@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Zubeen Garg — Music</title>
+
+  <link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+  <!-- BACKGROUND -->
+
+  <div class="background"></div>
+
+  <div class="overlay"></div>
+
+
+  <!-- TOP -->
+
+  <header class="topbar">
+
+    <div class="brand">
+      ZUBEEN GARG
+    </div>
+
+
+    <!-- SEARCH -->
+
+    <div class="top-search" id="topSearch">
+
+      <button id="openSearch" class="search-toggle" type="button">
+        🔍
+      </button>
+
+
+      <div id="searchBox" class="search-box">
+
+        <input id="search" type="search" placeholder="Search Zubeen songs..." autocomplete="off">
+
+
+        <button id="searchButton" type="button">
+          →
+        </button>
+
+
+        <button id="closeSearch" class="close-search" type="button">
+          ×
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <div class="status">
+
+      <span></span>
+
+      ONLINE
+
+    </div>
+
+  </header>
+
+
+  <!-- MAIN -->
+
+  <main class="content">
+
+
+    <!-- INTRO -->
+
+    <section class="intro">
+
+      <p class="eyebrow">
+        ASSAMESE MUSIC COLLECTION
+      </p>
+
+
+      <h1>
+        Listen to
+        <br>
+        <em>Zubeen</em>
+      </h1>
+
+
+      <p class="sub">
+        Search and discover Assamese music.
+      </p>
+
+    </section>
+
+
+    <!-- RESULTS -->
+
+    <section class="results-section">
+
+      <div id="searchStatus" class="search-status">
+        Search for a Zubeen Garg song
+      </div>
+
+
+      <div id="songs" class="songs"></div>
+
+    </section>
+
+  </main>
+
+
+  <!-- BOTTOM PLAYER -->
+
+  <div class="player">
+
+
+    <!-- MINI YOUTUBE -->
+
+    <div class="mini-video">
+
+      <div id="yt-player" class="yt-player"></div>
+
+    </div>
+
+
+    <!-- SONG INFO -->
+
+    <div class="now">
+
+      <strong id="nowTitle">
+        Select a song
+      </strong>
+
+      <small id="nowArtist">
+        Zubeen Garg
+      </small>
+
+    </div>
+
+
+    <!-- CONTROLS -->
+
+    <div class="controls">
+
+      <button id="prev" type="button">
+        ⏮
+      </button>
+
+      <button id="play" class="play" type="button">
+        ▶
+      </button>
+
+      <button id="next" type="button">
+        ⏭
+      </button>
+
+    </div>
+
+
+    <!-- TIMELINE -->
+
+    <div class="timeline">
+
+      <span id="current">
+        0:00
+      </span>
+
+      <input id="progress" type="range" min="0" max="100" value="0" step="0.1">
+
+      <span id="duration">
+        0:00
+      </span>
+
+    </div>
+
+
+    <!-- VOLUME -->
+
+    <div class="volume">
+
+      <span>🔊</span>
+
+      <input id="volume" type="range" min="0" max="100" value="80">
+
+    </div>
+
+  </div>
+
+
+  <!-- YOUTUBE API -->
+
+  <script src="https://www.youtube.com/iframe_api"></script>
+
+
+  <!-- JS -->
+
+  <script src="script.js"></script>
+
+</body>
+
+</html>

@@ -1,0 +1,1384 @@
+/* =========================================================
+   ZUBEEN GARG MUSIC
+   COMPLETE STYLE.CSS
+========================================================= */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+:root {
+    --white: #ffffff;
+    --muted: rgba(255, 255, 255, 0.66);
+    --soft: rgba(255, 255, 255, 0.10);
+    --line: rgba(255, 255, 255, 0.20);
+    --dark: rgba(7, 7, 7, 0.86);
+}
+
+html,
+body {
+    width: 100%;
+    min-height: 100%;
+}
+
+body {
+    min-height: 100vh;
+
+    overflow-x: hidden;
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    color: var(--white);
+
+    background: #080808;
+}
+
+
+/* =========================================================
+   CINEMATIC BACKGROUND
+========================================================= */
+
+.background {
+    position: fixed;
+
+    inset: -5%;
+
+    width: 110%;
+    height: 110%;
+
+    background-image:
+        url("./assets/zubeen-bg.jpg");
+
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+
+    z-index: -10;
+
+    transform: scale(1);
+
+    animation:
+        backgroundZoom 20s ease-in-out infinite alternate;
+
+    will-change: transform;
+}
+
+
+/* =========================================================
+   DARK CINEMATIC OVERLAY
+========================================================= */
+
+.overlay {
+    position: fixed;
+
+    inset: 0;
+
+    z-index: -9;
+
+    pointer-events: none;
+
+    background:
+        linear-gradient(90deg,
+            rgba(0, 0, 0, 0.78) 0%,
+            rgba(0, 0, 0, 0.38) 38%,
+            rgba(0, 0, 0, 0.18) 55%,
+            rgba(0, 0, 0, 0.68) 100%);
+}
+
+
+/* =========================================================
+   MOVING LIGHT — LEFT
+========================================================= */
+
+.overlay::before {
+    content: "";
+
+    position: absolute;
+
+    width: 60vw;
+    height: 60vw;
+
+    left: -20vw;
+    top: 5vh;
+
+    border-radius: 50%;
+
+    background:
+        radial-gradient(circle,
+            rgba(255, 255, 255, 0.13) 0%,
+            rgba(255, 255, 255, 0.05) 25%,
+            transparent 70%);
+
+    filter: blur(45px);
+
+    animation:
+        lightMove 15s ease-in-out infinite alternate;
+}
+
+
+/* =========================================================
+   MOVING LIGHT — RIGHT
+========================================================= */
+
+.overlay::after {
+    content: "";
+
+    position: absolute;
+
+    width: 55vw;
+    height: 55vw;
+
+    right: -18vw;
+    bottom: -20vw;
+
+    border-radius: 50%;
+
+    background:
+        radial-gradient(circle,
+            rgba(255, 180, 90, 0.12) 0%,
+            rgba(255, 120, 50, 0.04) 35%,
+            transparent 70%);
+
+    filter: blur(55px);
+
+    animation:
+        lightMoveTwo 18s ease-in-out infinite alternate;
+}
+
+
+/* =========================================================
+   BACKGROUND ZOOM
+========================================================= */
+
+@keyframes backgroundZoom {
+
+    0% {
+        transform:
+            scale(1) translate3d(0, 0, 0);
+    }
+
+    50% {
+        transform:
+            scale(1.035) translate3d(-0.4%, -0.3%, 0);
+    }
+
+    100% {
+        transform:
+            scale(1.075) translate3d(0.7%, 0.5%, 0);
+    }
+}
+
+
+/* =========================================================
+   LIGHT ANIMATION
+========================================================= */
+
+@keyframes lightMove {
+
+    0% {
+        transform:
+            translate3d(-10%, -5%, 0) scale(0.90);
+
+        opacity: 0.35;
+    }
+
+    50% {
+        transform:
+            translate3d(15%, 10%, 0) scale(1.05);
+
+        opacity: 0.65;
+    }
+
+    100% {
+        transform:
+            translate3d(5%, 25%, 0) scale(1.15);
+
+        opacity: 0.48;
+    }
+}
+
+
+@keyframes lightMoveTwo {
+
+    0% {
+        transform:
+            translate3d(10%, 10%, 0) scale(0.85);
+
+        opacity: 0.30;
+    }
+
+    50% {
+        transform:
+            translate3d(-15%, -10%, 0) scale(1.10);
+
+        opacity: 0.60;
+    }
+
+    100% {
+        transform:
+            translate3d(-5%, -20%, 0) scale(1.20);
+
+        opacity: 0.42;
+    }
+}
+
+
+/* =========================================================
+   FILM GRAIN
+========================================================= */
+
+body::after {
+    content: "";
+
+    position: fixed;
+
+    inset: 0;
+
+    z-index: 9999;
+
+    pointer-events: none;
+
+    opacity: 0.035;
+
+    background-image:
+        url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='.45'/%3E%3C/svg%3E");
+
+    animation:
+        grainMove 0.25s steps(2) infinite;
+}
+
+
+@keyframes grainMove {
+
+    0% {
+        transform: translate(0, 0);
+    }
+
+    25% {
+        transform: translate(-1%, 1%);
+    }
+
+    50% {
+        transform: translate(1%, -1%);
+    }
+
+    75% {
+        transform: translate(1%, 1%);
+    }
+
+    100% {
+        transform: translate(-1%, -1%);
+    }
+}
+
+
+/* =========================================================
+   TOP BAR
+========================================================= */
+
+.topbar {
+    position: fixed;
+
+    top: 0;
+    left: 0;
+    right: 0;
+
+    height: 82px;
+
+    z-index: 100;
+
+    display: grid;
+
+    grid-template-columns:
+        1fr auto 1fr;
+
+    align-items: center;
+
+    padding: 0 34px;
+
+    pointer-events: none;
+}
+
+
+/* =========================================================
+   BRAND
+========================================================= */
+
+.brand {
+    justify-self: start;
+
+    font-size: 13px;
+
+    font-weight: 700;
+
+    letter-spacing: 0.16em;
+}
+
+
+/* =========================================================
+   ONLINE STATUS
+========================================================= */
+
+.status {
+    justify-self: end;
+
+    font-size: 10px;
+
+    letter-spacing: 0.14em;
+
+    color: var(--muted);
+}
+
+.status span {
+    display: inline-block;
+
+    width: 7px;
+    height: 7px;
+
+    margin-right: 7px;
+
+    border-radius: 50%;
+
+    background: #b7ff75;
+
+    box-shadow:
+        0 0 12px #b7ff75;
+
+    animation:
+        onlinePulse 2s ease-in-out infinite;
+}
+
+
+@keyframes onlinePulse {
+
+    0%,
+    100% {
+        opacity: 0.55;
+
+        transform: scale(0.85);
+    }
+
+    50% {
+        opacity: 1;
+
+        transform: scale(1.15);
+    }
+}
+
+
+/* =========================================================
+   SEARCH AREA
+========================================================= */
+
+.top-search {
+    position: relative;
+
+    display: flex;
+
+    justify-content: center;
+
+    pointer-events: auto;
+}
+
+
+/* SEARCH ICON */
+
+.search-toggle {
+    width: 44px;
+    height: 44px;
+
+    display: grid;
+
+    place-items: center;
+
+    border:
+        1px solid rgba(255, 255, 255, 0.25);
+
+    border-radius: 50%;
+
+    background:
+        rgba(255, 255, 255, 0.09);
+
+    color: white;
+
+    cursor: pointer;
+
+    font-size: 15px;
+
+    backdrop-filter:
+        blur(20px);
+
+    -webkit-backdrop-filter:
+        blur(20px);
+
+    transition:
+        transform 0.25s ease,
+        background 0.25s ease,
+        opacity 0.25s ease;
+}
+
+
+.search-toggle:hover {
+    background:
+        rgba(255, 255, 255, 0.18);
+
+    transform:
+        scale(1.08);
+}
+
+
+/* =========================================================
+   SEARCH BOX
+========================================================= */
+
+.search-box {
+    position: absolute;
+
+    top: 0;
+    left: 50%;
+
+    width: 0;
+    height: 46px;
+
+    display: flex;
+
+    align-items: center;
+
+    overflow: hidden;
+
+    opacity: 0;
+
+    pointer-events: none;
+
+    transform:
+        translate(-50%, -5px) scaleY(0.15);
+
+    transform-origin:
+        top center;
+
+    border:
+        1px solid rgba(255, 255, 255, 0.25);
+
+    border-radius: 30px;
+
+    background:
+        rgba(12, 12, 12, 0.82);
+
+    backdrop-filter:
+        blur(25px);
+
+    -webkit-backdrop-filter:
+        blur(25px);
+
+    box-shadow:
+        0 20px 70px rgba(0, 0, 0, 0.45);
+
+    transition:
+        width 0.45s cubic-bezier(.22, 1, .36, 1),
+
+        opacity 0.25s ease,
+
+        transform 0.45s cubic-bezier(.22, 1, .36, 1);
+}
+
+
+/* SEARCH OPEN */
+
+.top-search.search-open .search-box {
+
+    width: 360px;
+
+    opacity: 1;
+
+    pointer-events: auto;
+
+    transform:
+        translate(-50%, 55px) scaleY(1);
+}
+
+
+.top-search.search-open .search-toggle {
+
+    opacity: 0;
+
+    pointer-events: none;
+}
+
+
+/* =========================================================
+   SEARCH INPUT
+========================================================= */
+
+#search {
+    flex: 1;
+
+    min-width: 0;
+
+    height: 100%;
+
+    padding:
+        0 17px;
+
+    border: none;
+
+    outline: none;
+
+    background: transparent;
+
+    color: white;
+
+    font-size: 13px;
+}
+
+
+#search::placeholder {
+    color:
+        rgba(255, 255, 255, 0.48);
+}
+
+
+/* SEARCH BUTTON */
+
+#searchButton {
+    width: 36px;
+    height: 36px;
+
+    flex-shrink: 0;
+
+    margin-right: 4px;
+
+    border: none;
+
+    border-radius: 50%;
+
+    background: white;
+
+    color: #111;
+
+    cursor: pointer;
+
+    font-size: 15px;
+
+    transition:
+        transform 0.2s ease;
+}
+
+
+#searchButton:hover {
+    transform:
+        scale(1.08);
+}
+
+
+/* CLOSE BUTTON */
+
+.close-search {
+    width: 30px;
+    height: 30px;
+
+    flex-shrink: 0;
+
+    margin-right: 5px;
+
+    border: none;
+
+    background: transparent;
+
+    color:
+        rgba(255, 255, 255, 0.65);
+
+    cursor: pointer;
+
+    font-size: 21px;
+
+    transition:
+        color 0.2s ease,
+        transform 0.25s ease;
+}
+
+
+.close-search:hover {
+    color: white;
+
+    transform:
+        rotate(90deg);
+}
+
+
+/* =========================================================
+   MAIN CONTENT
+========================================================= */
+
+.content {
+    min-height: 100vh;
+
+    padding:
+        110px 7% 130px;
+
+    display: grid;
+
+    grid-template-columns:
+        minmax(280px, 1fr) minmax(320px, 1fr);
+
+    gap: 8vw;
+
+    align-items: center;
+}
+
+
+/* =========================================================
+   INTRO
+========================================================= */
+
+.intro {
+    max-width: 650px;
+
+    animation:
+        introIn 1.2s cubic-bezier(.22, 1, .36, 1) both;
+}
+
+
+@keyframes introIn {
+
+    from {
+        opacity: 0;
+
+        transform:
+            translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+
+        transform:
+            translateY(0);
+    }
+}
+
+
+.eyebrow {
+    margin-bottom: 15px;
+
+    font-size: 10px;
+
+    letter-spacing: 0.22em;
+
+    color: var(--muted);
+}
+
+
+h1 {
+    font-size:
+        clamp(60px, 8vw, 115px);
+
+    line-height: 0.88;
+
+    font-weight: 700;
+
+    letter-spacing: -0.07em;
+}
+
+
+h1 em {
+    font-family:
+        Georgia,
+        "Times New Roman",
+        serif;
+
+    font-weight: 400;
+}
+
+
+.sub {
+    margin-top: 26px;
+
+    font-size: 14px;
+
+    line-height: 1.6;
+
+    color: var(--muted);
+}
+
+
+/* =========================================================
+   SEARCH RESULTS
+========================================================= */
+
+.results-section {
+    width: 100%;
+
+    min-height: 200px;
+
+    align-self: center;
+
+    animation:
+        resultsIn 1.2s 0.15s cubic-bezier(.22, 1, .36, 1) both;
+}
+
+
+@keyframes resultsIn {
+
+    from {
+        opacity: 0;
+
+        transform:
+            translateY(35px);
+    }
+
+    to {
+        opacity: 1;
+
+        transform:
+            translateY(0);
+    }
+}
+
+
+/* =========================================================
+   SEARCH STATUS
+========================================================= */
+
+.search-status {
+    margin-bottom: 12px;
+
+    padding-left: 5px;
+
+    font-size: 11px;
+
+    color:
+        rgba(255, 255, 255, 0.55);
+}
+
+
+/* =========================================================
+   SONG LIST
+========================================================= */
+
+.songs {
+    width: 100%;
+
+    max-height: 46vh;
+
+    overflow-y: auto;
+
+    padding-right: 5px;
+}
+
+
+.songs::-webkit-scrollbar {
+    width: 3px;
+}
+
+
+.songs::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+
+.songs::-webkit-scrollbar-thumb {
+    background:
+        rgba(255, 255, 255, 0.30);
+
+    border-radius: 10px;
+}
+
+
+/* =========================================================
+   SONG
+========================================================= */
+
+.song {
+    display: flex;
+
+    align-items: center;
+
+    gap: 14px;
+
+    padding:
+        14px 8px;
+
+    border-bottom:
+        1px solid rgba(255, 255, 255, 0.12);
+
+    cursor: pointer;
+
+    transition:
+        background 0.25s ease,
+        transform 0.25s ease;
+}
+
+
+.song:hover {
+    background:
+        rgba(255, 255, 255, 0.08);
+
+    transform:
+        translateX(5px);
+}
+
+
+.song.active {
+    background:
+        rgba(255, 255, 255, 0.12);
+
+    border-radius: 10px;
+}
+
+
+.num {
+    width: 28px;
+
+    flex-shrink: 0;
+
+    font-size: 10px;
+
+    color:
+        rgba(255, 255, 255, 0.42);
+}
+
+
+.song-info {
+    flex: 1;
+
+    min-width: 0;
+}
+
+
+.song-title {
+    display: block;
+
+    font-size: 14px;
+
+    white-space: nowrap;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+}
+
+
+.song-artist {
+    display: block;
+
+    margin-top: 4px;
+
+    font-size: 10px;
+
+    color: var(--muted);
+}
+
+
+.song-channel {
+    display: block;
+
+    margin-top: 3px;
+
+    font-size: 9px;
+
+    color:
+        rgba(255, 255, 255, 0.38);
+}
+
+
+.song button {
+    width: 35px;
+    height: 35px;
+
+    flex-shrink: 0;
+
+    border: none;
+
+    border-radius: 50%;
+
+    background:
+        rgba(255, 255, 255, 0.09);
+
+    color: white;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease;
+}
+
+
+.song button:hover {
+    background:
+        rgba(255, 255, 255, 0.20);
+
+    transform:
+        scale(1.08);
+}
+
+
+/* =========================================================
+   EMPTY / SEARCH MESSAGE
+========================================================= */
+
+.empty-state {
+    padding:
+        40px 5px;
+
+    color:
+        rgba(255, 255, 255, 0.55);
+}
+
+
+.empty-state h3 {
+    margin-bottom: 7px;
+
+    color: white;
+
+    font-size: 15px;
+}
+
+
+.empty-state p {
+    font-size: 11px;
+}
+
+
+/* =========================================================
+   MUSIC PLAYER
+========================================================= */
+
+.player {
+    position: fixed;
+
+    left: 18px;
+    right: 18px;
+    bottom: 18px;
+
+    height: 70px;
+
+    z-index: 200;
+
+    display: grid;
+
+    grid-template-columns:
+        80px minmax(150px, 1.2fr) auto minmax(180px, 2fr) 140px;
+
+    align-items: center;
+
+    gap: 16px;
+
+    padding:
+        8px 14px;
+
+    border:
+        1px solid rgba(255, 255, 255, 0.18);
+
+    border-radius: 18px;
+
+    background:
+        rgba(7, 7, 7, 0.87);
+
+    backdrop-filter:
+        blur(25px);
+
+    -webkit-backdrop-filter:
+        blur(25px);
+
+    box-shadow:
+        0 20px 70px rgba(0, 0, 0, 0.45);
+}
+
+
+/* =========================================================
+   MINI YOUTUBE VIDEO
+========================================================= */
+
+.mini-video {
+    width: 80px;
+    height: 50px;
+
+    overflow: hidden;
+
+    border-radius: 8px;
+
+    background: #000;
+
+    box-shadow:
+        0 5px 20px rgba(0, 0, 0, 0.4);
+}
+
+
+.yt-player {
+    width: 100%;
+    height: 100%;
+}
+
+
+/* =========================================================
+   CURRENT SONG
+========================================================= */
+
+.now {
+    min-width: 0;
+}
+
+
+.now strong {
+    display: block;
+
+    font-size: 13px;
+
+    white-space: nowrap;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+}
+
+
+.now small {
+    display: block;
+
+    margin-top: 4px;
+
+    font-size: 10px;
+
+    color: var(--muted);
+
+    white-space: nowrap;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+}
+
+
+/* =========================================================
+   PLAYER CONTROLS
+========================================================= */
+
+.controls {
+    display: flex;
+
+    align-items: center;
+
+    gap: 4px;
+}
+
+
+.controls button {
+    width: 34px;
+    height: 34px;
+
+    border: none;
+
+    border-radius: 50%;
+
+    background: transparent;
+
+    color: white;
+
+    cursor: pointer;
+
+    font-size: 15px;
+
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease;
+}
+
+
+.controls button:hover {
+    background:
+        rgba(255, 255, 255, 0.12);
+}
+
+
+.controls .play {
+    background: white;
+
+    color: #111;
+}
+
+
+.controls .play:hover {
+    background: white;
+
+    transform:
+        scale(1.08);
+}
+
+
+/* =========================================================
+   TIMELINE
+========================================================= */
+
+.timeline {
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    font-size: 9px;
+
+    color: var(--muted);
+}
+
+
+.timeline span {
+    width: 28px;
+
+    flex-shrink: 0;
+
+    text-align: center;
+}
+
+
+input[type="range"] {
+    width: 100%;
+
+    accent-color: white;
+
+    cursor: pointer;
+}
+
+
+/* =========================================================
+   VOLUME
+========================================================= */
+
+.volume {
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+}
+
+
+.volume input {
+    width: 90px;
+}
+
+
+/* =========================================================
+   SEARCH LOADING
+========================================================= */
+
+.loading #searchButton {
+    animation:
+        searchSpin 0.8s linear infinite;
+}
+
+
+@keyframes searchSpin {
+
+    from {
+        transform:
+            rotate(0deg);
+    }
+
+    to {
+        transform:
+            rotate(360deg);
+    }
+}
+
+
+/* =========================================================
+   DESKTOP LARGE
+========================================================= */
+
+@media (min-width: 1400px) {
+
+    .content {
+        padding-left: 10%;
+        padding-right: 8%;
+    }
+
+    h1 {
+        font-size: 120px;
+    }
+
+}
+
+
+/* =========================================================
+   TABLET
+========================================================= */
+
+@media (max-width: 900px) {
+
+    .content {
+        grid-template-columns: 1fr;
+
+        gap: 30px;
+
+        padding:
+            110px 5% 135px;
+
+        align-items: start;
+    }
+
+
+    .intro {
+        padding-top: 30px;
+    }
+
+
+    .results-section {
+        margin-top: 10px;
+    }
+
+
+    .songs {
+        max-height: 40vh;
+    }
+
+
+    .player {
+        grid-template-columns:
+            65px minmax(100px, 1fr) auto;
+
+        gap: 10px;
+    }
+
+
+    .timeline {
+        grid-column: 1 / -1;
+
+        grid-row: 2;
+    }
+
+
+    .volume {
+        display: none;
+    }
+
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 560px) {
+
+    .topbar {
+        height: 70px;
+
+        padding:
+            0 18px;
+    }
+
+
+    .brand {
+        font-size: 10px;
+    }
+
+
+    .status {
+        font-size: 8px;
+    }
+
+
+    .search-toggle {
+        width: 40px;
+        height: 40px;
+    }
+
+
+    .top-search.search-open .search-box {
+
+        width:
+            calc(100vw - 40px);
+
+    }
+
+
+    .content {
+        padding:
+            95px 20px 130px;
+    }
+
+
+    h1 {
+        font-size: 62px;
+    }
+
+
+    .sub {
+        font-size: 12px;
+    }
+
+
+    .player {
+        left: 8px;
+        right: 8px;
+        bottom: 8px;
+
+        height: 68px;
+
+        grid-template-columns:
+            58px minmax(0, 1fr) auto;
+
+        gap: 9px;
+
+        padding:
+            7px 9px;
+
+        border-radius: 15px;
+    }
+
+
+    .mini-video {
+        width: 54px;
+        height: 40px;
+    }
+
+
+    .now strong {
+        font-size: 11px;
+    }
+
+
+    .now small {
+        font-size: 9px;
+    }
+
+
+    .controls button {
+        width: 30px;
+        height: 30px;
+
+        font-size: 13px;
+    }
+
+
+    .timeline {
+        display: none;
+    }
+
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+    .background,
+    .overlay::before,
+    .overlay::after,
+    body::after,
+    .intro,
+    .results-section,
+    .status span {
+
+        animation: none !important;
+    }
+
+}
