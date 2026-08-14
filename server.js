@@ -1,11 +1,52 @@
 const express = require("express");
 const path = require("path");
+const rateLimit = require("express-rate-limit");
 require("dotenv").config();
 
 const app = express();
 
-const PORT = 5500;
-const API_KEY = process.env.YOUTUBE_API_KEY;
+
+/* =====================================================
+   CONFIG
+===================================================== */
+
+const PORT =
+    process.env.PORT || 5500;
+
+const API_KEY =
+    process.env.YOUTUBE_API_KEY;
+
+
+/*
+    Cache duration
+
+    30 minutes
+*/
+
+const CACHE_TIME =
+    30 * 60 * 1000;
+
+
+/*
+    Keep old results for fallback
+
+    24 hours
+*/
+
+const STALE_CACHE_TIME =
+    24 * 60 * 60 * 1000;
+
+
+/*
+    Maximum YouTube search requests
+    from this server per day.
+
+    search.list = 100 quota units.
+
+    80 × 100 = 8000 units.
+*/
+
+const DAILY_SEARCH_LIMIT = 80;
 
 
 /* =====================================================
@@ -13,8 +54,111 @@ const API_KEY = process.env.YOUTUBE_API_KEY;
 ===================================================== */
 
 if (!API_KEY) {
-    console.error("❌ YOUTUBE_API_KEY not found in .env");
+
+    console.error("");
+    console.error(
+        "❌ YOUTUBE_API_KEY not found"
+    );
+
+    console.error(
+        "Create a .env file with:"
+    );
+
+    console.error(
+        "YOUTUBE_API_KEY=YOUR_API_KEY"
+    );
+
+    console.error("");
+
     process.exit(1);
+
+}
+
+
+/* =====================================================
+   SEARCH CACHE
+===================================================== */
+
+const searchCache =
+    new Map();
+
+
+/* =====================================================
+   DAILY SEARCH COUNTER
+===================================================== */
+
+let dailySearchCount = 0;
+
+let dailySearchDate =
+    new Date()
+        .toISOString()
+        .slice(0, 10);
+
+
+/* =====================================================
+   RESET DAILY COUNTER
+===================================================== */
+
+function resetDailyCounter() {
+
+    const today =
+        new Date()
+            .toISOString()
+            .slice(0, 10);
+
+
+    if (
+        today !==
+        dailySearchDate
+    ) {
+
+        dailySearchDate =
+            today;
+
+        dailySearchCount =
+            0;
+
+        console.log(
+            "🔄 Daily YouTube search counter reset"
+        );
+
+    }
+
+}
+
+
+/* =====================================================
+   CHECK DAILY SEARCH BUDGET
+===================================================== */
+
+function canUseYouTubeSearch() {
+
+    resetDailyCounter();
+
+
+    return (
+        dailySearchCount <
+        DAILY_SEARCH_LIMIT
+    );
+
+}
+
+
+/* =====================================================
+   RECORD YOUTUBE SEARCH
+===================================================== */
+
+function recordYouTubeSearch() {
+
+    resetDailyCounter();
+
+    dailySearchCount++;
+
+
+    console.log(
+        `📊 YouTube searches today: ${dailySearchCount}/${DAILY_SEARCH_LIMIT}`
+    );
+
 }
 
 
@@ -22,7 +166,12 @@ if (!API_KEY) {
    MIDDLEWARE
 ===================================================== */
 
-app.use(express.json());
+app.use(
+    express.json({
+        limit: "10kb"
+    })
+);
+
 
 app.use(
     express.static(
@@ -32,121 +181,764 @@ app.use(
 
 
 /* =====================================================
-   HOME
+   RATE LIMITER
 ===================================================== */
 
-app.get("/", (req, res) => {
+const searchLimiter =
+    rateLimit({
 
-    res.sendFile(
-        path.join(
-            __dirname,
-            "index.html"
-        )
-    );
+        windowMs:
+            60 * 1000,
 
-});
+        /*
+            Maximum 20 searches
+            per IP per minute.
+        */
+
+        max:
+            20,
+
+        standardHeaders:
+            true,
+
+        legacyHeaders:
+            false,
+
+        message: {
+
+            success:
+                false,
+
+            error:
+                "Too many searches.",
+
+            message:
+                "Please wait a minute and try again.",
+
+            results:
+                []
+
+        }
+
+    });
 
 
 /* =====================================================
-   YOUTUBE SEARCH
+   CACHE CLEANUP
+===================================================== */
+
+setInterval(
+    () => {
+
+        const now =
+            Date.now();
+
+
+        let removed =
+            0;
+
+
+        for (
+            const [
+                key,
+                value
+            ]
+            of searchCache
+        ) {
+
+            if (
+                now -
+                value.timestamp
+                >
+                STALE_CACHE_TIME
+            ) {
+
+                searchCache.delete(
+                    key
+                );
+
+                removed++;
+
+            }
+
+        }
+
+
+        if (
+            removed > 0
+        ) {
+
+            console.log(
+                `🧹 Cache cleanup: ${removed} old entries removed`
+            );
+
+        }
+
+    },
+    30 * 60 * 1000
+);
+
+
+/* =====================================================
+   HOME
+===================================================== */
+
+app.get(
+    "/",
+    (req, res) => {
+
+        res.sendFile(
+            path.join(
+                __dirname,
+                "index.html"
+            )
+        );
+
+    }
+);
+
+
+/* =====================================================
+   HEALTH CHECK
+===================================================== */
+
+app.get(
+    "/api/health",
+    (req, res) => {
+
+        resetDailyCounter();
+
+
+        res.json({
+
+            success:
+                true,
+
+            server:
+                "online",
+
+            youtubeConfigured:
+                Boolean(API_KEY),
+
+            dailySearchesUsed:
+                dailySearchCount,
+
+            dailySearchLimit:
+                DAILY_SEARCH_LIMIT,
+
+            cacheEntries:
+                searchCache.size,
+
+            timestamp:
+                new Date()
+                    .toISOString()
+
+        });
+
+    }
+);
+
+
+/* =====================================================
+   YOUTUBE FETCH WITH TIMEOUT
+===================================================== */
+
+async function fetchYouTube(
+    url
+) {
+
+    const controller =
+        new AbortController();
+
+
+    /*
+        8 second timeout
+    */
+
+    const timeout =
+        setTimeout(
+            () => {
+
+                controller.abort();
+
+            },
+            8000
+        );
+
+
+    try {
+
+        const response =
+            await fetch(
+                url,
+                {
+
+                    method:
+                        "GET",
+
+                    signal:
+                        controller.signal,
+
+                    headers: {
+
+                        Accept:
+                            "application/json"
+
+                    }
+
+                }
+            );
+
+
+        return response;
+
+    }
+
+    finally {
+
+        clearTimeout(
+            timeout
+        );
+
+    }
+
+}
+
+
+/* =====================================================
+   SEARCH
 ===================================================== */
 
 app.get(
     "/api/search",
+    searchLimiter,
     async (req, res) => {
 
-        const query =
+        /* =================================================
+           QUERY
+        ================================================= */
+
+        let query =
             String(
                 req.query.q || ""
             ).trim();
 
 
-        /* Empty search */
+        /* =================================================
+           EMPTY QUERY
+        ================================================= */
 
-        if (!query) {
+        if (
+            !query
+        ) {
 
-            return res.status(400).json({
+            return res
+                .status(400)
+                .json({
 
-                error:
-                    "Search query is required"
+                    success:
+                        false,
 
-            });
+                    error:
+                        "Search query is required.",
+
+                    results:
+                        []
+
+                });
 
         }
 
 
-        try {
+        /* =================================================
+           MINIMUM LENGTH
+        ================================================= */
+
+        if (
+            query.length < 2
+        ) {
+
+            return res
+                .status(400)
+                .json({
+
+                    success:
+                        false,
+
+                    error:
+                        "Please enter at least 2 characters.",
+
+                    results:
+                        []
+
+                });
+
+        }
+
+
+        /* =================================================
+           MAXIMUM LENGTH
+        ================================================= */
+
+        if (
+            query.length > 100
+        ) {
+
+            return res
+                .status(400)
+                .json({
+
+                    success:
+                        false,
+
+                    error:
+                        "Search query is too long.",
+
+                    results:
+                        []
+
+                });
+
+        }
+
+
+        /* =================================================
+           CLEAN QUERY
+        ================================================= */
+
+        query =
+            query
+                .replace(
+                    /\s+/g,
+                    " "
+                )
+                .trim();
+
+
+        /*
+            Cache key is lowercase.
+        */
+
+        const cacheKey =
+            query.toLowerCase();
+
+
+        /* =================================================
+           CACHE CHECK
+        ================================================= */
+
+        const cached =
+            searchCache.get(
+                cacheKey
+            );
+
+
+        if (
+            cached
+        ) {
+
+            const age =
+                Date.now() -
+                cached.timestamp;
+
 
             /*
-             * Search specifically around
-             * Zubeen Garg.
-             */
+                Fresh cache
+            */
 
-            const youtubeQuery =
-                `${query} Zubeen Garg Assamese`;
+            if (
+                age <
+                CACHE_TIME
+            ) {
 
+                console.log(
+                    `⚡ CACHE HIT: ${query}`
+                );
+
+
+                return res.json({
+
+                    success:
+                        true,
+
+                    cached:
+                        true,
+
+                    stale:
+                        false,
+
+                    results:
+                        cached.results
+
+                });
+
+            }
+
+        }
+
+
+        /* =================================================
+           DAILY API SAFETY CHECK
+        ================================================= */
+
+        if (
+            !canUseYouTubeSearch()
+        ) {
+
+            console.warn(
+                "🛑 Daily YouTube search safety limit reached"
+            );
+
+
+            /*
+                Use stale cache if available.
+            */
+
+            if (
+                cached &&
+                cached.results &&
+                cached.results.length
+            ) {
+
+                return res.json({
+
+                    success:
+                        true,
+
+                    cached:
+                        true,
+
+                    stale:
+                        true,
+
+                    message:
+                        "Showing saved results.",
+
+                    results:
+                        cached.results
+
+                });
+
+            }
+
+
+            return res
+                .status(503)
+                .json({
+
+                    success:
+                        false,
+
+                    quota:
+                        true,
+
+                    error:
+                        "Search temporarily unavailable.",
+
+                    message:
+                        "Daily search limit reached. Please try again later.",
+
+                    results:
+                        []
+
+                });
+
+        }
+
+
+        /* =================================================
+           YOUTUBE QUERY
+        ================================================= */
+
+        const youtubeQuery =
+            `${query} Zubeen Garg Assamese`;
+
+
+        console.log(
+            `🔎 YouTube search: ${youtubeQuery}`
+        );
+
+
+        try {
+
+            /* =================================================
+               PARAMETERS
+            ================================================= */
 
             const params =
                 new URLSearchParams({
 
-                    part: "snippet",
+                    part:
+                        "snippet",
 
-                    q: youtubeQuery,
+                    q:
+                        youtubeQuery,
 
-                    type: "video",
+                    type:
+                        "video",
 
-                    maxResults: "10",
+                    maxResults:
+                        "10",
 
-                    regionCode: "IN",
+                    regionCode:
+                        "IN",
 
-                    relevanceLanguage: "en",
+                    relevanceLanguage:
+                        "en",
 
-                    videoEmbeddable: "true",
+                    videoEmbeddable:
+                        "true",
 
-                    videoSyndicated: "true",
+                    videoSyndicated:
+                        "true",
 
-                    key: API_KEY
+                    key:
+                        API_KEY
 
                 });
 
+
+            /* =================================================
+               URL
+            ================================================= */
 
             const youtubeURL =
                 "https://www.googleapis.com/youtube/v3/search?" +
                 params.toString();
 
 
-            console.log(
-                `🔎 YouTube search: ${youtubeQuery}`
-            );
+            /*
+                Count ONLY when we are
+                actually going to YouTube.
+            */
 
+            recordYouTubeSearch();
+
+
+            /* =================================================
+               REQUEST
+            ================================================= */
 
             const response =
-                await fetch(
+                await fetchYouTube(
                     youtubeURL
                 );
 
 
-            const data =
-                await response.json();
+            /* =================================================
+               JSON
+            ================================================= */
+
+            let data = {};
 
 
-            /* YouTube API error */
+            try {
 
-            if (!response.ok) {
+                data =
+                    await response.json();
+
+            }
+
+            catch {
+
+                data = {};
+
+            }
+
+
+            /* =================================================
+               API ERROR
+            ================================================= */
+
+            if (
+                !response.ok
+            ) {
 
                 console.error(
-                    "YouTube API error:",
+                    "❌ YouTube API error:",
+                    response.status,
                     data
                 );
 
 
+                const reasons =
+                    data
+                        ?.error
+                        ?.errors
+                        ?.map(
+                            item =>
+                                item.reason
+                        ) ||
+                    [];
+
+
+                /* =============================================
+                   QUOTA ERROR
+                ============================================= */
+
+                if (
+
+                    reasons.includes(
+                        "quotaExceeded"
+                    )
+
+                    ||
+
+                    reasons.includes(
+                        "dailyLimitExceeded"
+                    )
+
+                ) {
+
+                    console.warn(
+                        "🛑 YouTube quota exceeded"
+                    );
+
+
+                    /*
+                        Stale cache fallback
+                    */
+
+                    if (
+                        cached &&
+                        cached.results &&
+                        cached.results.length
+                    ) {
+
+                        return res.json({
+
+                            success:
+                                true,
+
+                            cached:
+                                true,
+
+                            stale:
+                                true,
+
+                            message:
+                                "Showing saved results.",
+
+                            results:
+                                cached.results
+
+                        });
+
+                    }
+
+
+                    return res
+                        .status(503)
+                        .json({
+
+                            success:
+                                false,
+
+                            quota:
+                                true,
+
+                            error:
+                                "YouTube search is temporarily unavailable.",
+
+                            message:
+                                "Please try again later.",
+
+                            results:
+                                []
+
+                        });
+
+                }
+
+
+                /* =============================================
+                   INVALID API KEY
+                ============================================= */
+
+                if (
+
+                    reasons.includes(
+                        "keyInvalid"
+                    )
+
+                ) {
+
+                    console.error(
+                        "❌ YouTube API key is invalid"
+                    );
+
+
+                    return res
+                        .status(500)
+                        .json({
+
+                            success:
+                                false,
+
+                            error:
+                                "YouTube API configuration error.",
+
+                            message:
+                                "Please check the API key in the server environment.",
+
+                            results:
+                                []
+
+                        });
+
+                }
+
+
+                /* =============================================
+                   OTHER API ERROR
+                ============================================= */
+
+                if (
+                    cached &&
+                    cached.results &&
+                    cached.results.length
+                ) {
+
+                    return res.json({
+
+                        success:
+                            true,
+
+                        cached:
+                            true,
+
+                        stale:
+                            true,
+
+                        message:
+                            "Showing saved results.",
+
+                        results:
+                            cached.results
+
+                    });
+
+                }
+
+
                 return res
-                    .status(response.status)
+                    .status(503)
                     .json({
 
+                        success:
+                            false,
+
                         error:
-                            data.error?.message ||
-                            "YouTube API request failed"
+                            "YouTube search is temporarily unavailable.",
+
+                        message:
+                            data
+                                ?.error
+                                ?.message ||
+                            "Please try again later.",
+
+                        results:
+                            []
 
                     });
 
@@ -154,14 +946,27 @@ app.get(
 
 
             /* =================================================
-               FILTER ZUBEEN RESULTS
+               ITEMS
+            ================================================= */
+
+            const items =
+                Array.isArray(
+                    data.items
+                )
+                    ? data.items
+                    : [];
+
+
+            /* =================================================
+               FILTER ZUBEEN
             ================================================= */
 
             const results =
-                (data.items || [])
+                items
 
                     .filter(
                         item =>
+                            item &&
                             item.id &&
                             item.id.videoId
                     )
@@ -170,16 +975,29 @@ app.get(
                         item => {
 
                             const title =
-                                (
-                                    item.snippet
-                                        ?.title || ""
+                                String(
+                                    item
+                                        ?.snippet
+                                        ?.title ||
+                                    ""
                                 ).toLowerCase();
 
 
                             const channel =
-                                (
-                                    item.snippet
-                                        ?.channelTitle || ""
+                                String(
+                                    item
+                                        ?.snippet
+                                        ?.channelTitle ||
+                                    ""
+                                ).toLowerCase();
+
+
+                            const description =
+                                String(
+                                    item
+                                        ?.snippet
+                                        ?.description ||
+                                    ""
                                 ).toLowerCase();
 
 
@@ -191,12 +1009,6 @@ app.get(
 
                                 ||
 
-                                channel.includes(
-                                    "zubeen"
-                                )
-
-                                ||
-
                                 title.includes(
                                     "garg"
                                 )
@@ -204,7 +1016,19 @@ app.get(
                                 ||
 
                                 channel.includes(
+                                    "zubeen"
+                                )
+
+                                ||
+
+                                channel.includes(
                                     "garg"
+                                )
+
+                                ||
+
+                                description.includes(
+                                    "zubeen garg"
                                 )
 
                             );
@@ -212,62 +1036,194 @@ app.get(
                         }
                     )
 
-                    .slice(0, 2)
+                    /*
+                        Only 2 results.
+                    */
+
+                    .slice(
+                        0,
+                        2
+                    )
 
                     .map(
                         item => ({
 
                             videoId:
-                                item.id.videoId,
+                                item
+                                    .id
+                                    .videoId,
 
                             title:
-                                item.snippet.title,
+                                item
+                                    .snippet
+                                    .title,
 
                             channel:
-                                item.snippet.channelTitle,
+                                item
+                                    .snippet
+                                    .channelTitle,
 
                             thumbnail:
-                                item.snippet
+                                item
+                                    .snippet
                                     .thumbnails
                                     ?.medium
-                                    ?.url || ""
+                                    ?.url ||
+                                item
+                                    .snippet
+                                    .thumbnails
+                                    ?.default
+                                    ?.url ||
+                                ""
 
                         })
                     );
 
 
-            console.log(
-                `✅ Results found: ${results.length}`
+            /* =================================================
+               NO RESULTS
+            ================================================= */
+
+            if (
+                results.length === 0
+            ) {
+
+                console.log(
+                    `⚠️ No Zubeen result: ${query}`
+                );
+
+
+                return res.json({
+
+                    success:
+                        true,
+
+                    cached:
+                        false,
+
+                    results:
+                        [],
+
+                    message:
+                        "No Zubeen Garg song found."
+
+                });
+
+            }
+
+
+            /* =================================================
+               SAVE CACHE
+            ================================================= */
+
+            searchCache.set(
+                cacheKey,
+                {
+
+                    timestamp:
+                        Date.now(),
+
+                    results:
+                        results
+
+                }
             );
 
 
             /* =================================================
-               RESPONSE
+               SUCCESS
             ================================================= */
 
-            res.json({
+            console.log(
+                `✅ ${results.length} result(s): ${query}`
+            );
 
-                results: results
+
+            return res.json({
+
+                success:
+                    true,
+
+                cached:
+                    false,
+
+                stale:
+                    false,
+
+                results:
+                    results
 
             });
 
         }
 
 
+        /* =================================================
+           NETWORK / TIMEOUT ERROR
+        ================================================= */
+
         catch (error) {
 
             console.error(
-                "❌ Search failed:",
-                error
+                "❌ YouTube request failed:",
+                error.message
             );
 
 
-            res.status(500).json({
+            /*
+                Use stale cache.
+            */
 
-                error:
-                    "Could not connect to YouTube"
+            if (
+                cached &&
+                cached.results &&
+                cached.results.length
+            ) {
 
-            });
+                console.log(
+                    `🛟 STALE CACHE FALLBACK: ${query}`
+                );
+
+
+                return res.json({
+
+                    success:
+                        true,
+
+                    cached:
+                        true,
+
+                    stale:
+                        true,
+
+                    message:
+                        "Showing saved results.",
+
+                    results:
+                        cached.results
+
+                });
+
+            }
+
+
+            return res
+                .status(503)
+                .json({
+
+                    success:
+                        false,
+
+                    error:
+                        "Unable to connect to YouTube.",
+
+                    message:
+                        "Please check your internet connection and try again.",
+
+                    results:
+                        []
+
+                });
 
         }
 
@@ -276,19 +1232,75 @@ app.get(
 
 
 /* =====================================================
-   404 API
+   API 404
 ===================================================== */
 
 app.use(
     "/api",
     (req, res) => {
 
-        res.status(404).json({
+        res
+            .status(404)
+            .json({
 
-            error:
-                "API route not found"
+                success:
+                    false,
 
-        });
+                error:
+                    "API route not found.",
+
+                results:
+                    []
+
+            });
+
+    }
+);
+
+
+/* =====================================================
+   GLOBAL ERROR HANDLER
+===================================================== */
+
+app.use(
+    (
+        error,
+        req,
+        res,
+        next
+    ) => {
+
+        console.error(
+            "❌ GLOBAL SERVER ERROR:",
+            error
+        );
+
+
+        if (
+            res.headersSent
+        ) {
+
+            return next(
+                error
+            );
+
+        }
+
+
+        res
+            .status(500)
+            .json({
+
+                success:
+                    false,
+
+                error:
+                    "Internal server error.",
+
+                results:
+                    []
+
+            });
 
     }
 );
@@ -300,19 +1312,21 @@ app.use(
 
 app.listen(
     PORT,
+    "0.0.0.0",
     () => {
 
         console.log("");
+
         console.log(
-            "================================"
+            "=========================================="
         );
 
         console.log(
-            "🎵 ZUBEEN MUSIC WEBSITE"
+            "🎵 ZUBEEN GARG MUSIC WEBSITE"
         );
 
         console.log(
-            "================================"
+            "=========================================="
         );
 
         console.log(
@@ -320,12 +1334,34 @@ app.listen(
         );
 
         console.log(
-            `🔎 http://localhost:${PORT}/api/search?q=Anamika`
+            `❤️  Health: http://localhost:${PORT}/api/health`
         );
 
         console.log(
-            "================================"
+            `🔎 Search: http://localhost:${PORT}/api/search?q=Anamika`
         );
+
+        console.log(
+            "⚡ Cache: 30 minutes"
+        );
+
+        console.log(
+            "🛡️ Rate limit: 20 searches/min/IP"
+        );
+
+        console.log(
+            "📊 Daily YouTube limit: 80 searches"
+        );
+
+        console.log(
+            "⏱️ YouTube timeout: 8 seconds"
+        );
+
+        console.log(
+            "=========================================="
+        );
+
+        console.log("");
 
     }
 );
