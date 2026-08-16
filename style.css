@@ -1,6 +1,6 @@
 /* =====================================================
    ZUBEEN MUSIC
-   FINAL LIQUID GLASS UI
+   FINAL RESPONSIVE LIQUID GLASS UI
 ===================================================== */
 
 * {
@@ -32,8 +32,13 @@ body {
     min-height: 100%;
 }
 
+html {
+    scroll-behavior: smooth;
+}
+
 body {
     min-height: 100vh;
+    min-height: 100svh;
 
     font-family:
         Inter,
@@ -50,6 +55,7 @@ body {
     overflow-x: hidden;
 
     -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
 }
 
 
@@ -59,6 +65,7 @@ body {
 
 .background {
     position: fixed;
+
     inset: -5%;
 
     background-image:
@@ -110,6 +117,7 @@ body::before {
     content: "";
 
     position: fixed;
+
     inset: 0;
 
     pointer-events: none;
@@ -156,6 +164,7 @@ body::after {
     content: "";
 
     position: fixed;
+
     inset: 0;
 
     pointer-events: none;
@@ -183,7 +192,9 @@ body::after {
     height: 84px;
 
     display: flex;
+
     align-items: center;
+
     justify-content: space-between;
 
     padding: 0 34px;
@@ -207,6 +218,7 @@ body::after {
 
 .status {
     display: flex;
+
     align-items: center;
 
     font-size: 10px;
@@ -266,9 +278,11 @@ body::after {
     width: 42px;
     height: 42px;
 
-    transform: translateX(-50%);
+    transform:
+        translateX(-50%);
 
     display: grid;
+
     place-items: center;
 
     z-index: 100;
@@ -364,6 +378,7 @@ body::after {
     position: relative;
 
     display: flex;
+
     align-items: center;
 
     gap: 10px;
@@ -386,6 +401,7 @@ body::after {
         blur(30px) saturate(140%);
 
     box-shadow:
+
         0 20px 80px rgba(0, 0, 0, .42),
 
         inset 0 1px 0 rgba(255, 255, 255, .12);
@@ -393,10 +409,12 @@ body::after {
 
 
 .search-box:focus-within {
+
     border-color:
         rgba(255, 255, 255, .32);
 
     box-shadow:
+
         0 20px 90px rgba(0, 0, 0, .48),
 
         0 0 0 5px rgba(255, 255, 255, .035);
@@ -409,13 +427,17 @@ body::after {
     min-width: 0;
 
     border: 0;
+
     outline: 0;
 
-    background: transparent;
+    background:
+        transparent;
 
-    color: white;
+    color:
+        white;
 
-    font-size: 14px;
+    font-size:
+        14px;
 
     padding:
         11px 0;
@@ -423,6 +445,7 @@ body::after {
 
 
 #search::placeholder {
+
     color:
         rgba(255, 255, 255, .42);
 }
@@ -430,36 +453,52 @@ body::after {
 
 #searchButton,
 #closeSearch {
+
     border: 0;
+
     outline: 0;
 
     cursor: pointer;
 
-    color: white;
+    color:
+        white;
 
-    background: transparent;
+    background:
+        transparent;
 }
 
 
-/* Search button */
+/* =====================================================
+   SEARCH BUTTON
+===================================================== */
 
 #searchButton {
-    width: 38px;
-    height: 38px;
 
-    display: grid;
-    place-items: center;
+    width:
+        38px;
 
-    border-radius: 50%;
+    height:
+        38px;
+
+    display:
+        grid;
+
+    place-items:
+        center;
+
+    border-radius:
+        50%;
 
     background:
         rgba(255, 255, 255, .10);
 
-    transition: .25s ease;
+    transition:
+        .25s ease;
 }
 
 
 #searchButton:hover {
+
     background:
         rgba(255, 255, 255, .20);
 
@@ -468,23 +507,36 @@ body::after {
 }
 
 
-/* Close */
+/* =====================================================
+   CLOSE SEARCH
+===================================================== */
 
 #closeSearch {
-    width: 34px;
-    height: 34px;
 
-    display: grid;
-    place-items: center;
+    width:
+        34px;
 
-    opacity: .55;
+    height:
+        34px;
 
-    transition: .25s ease;
+    display:
+        grid;
+
+    place-items:
+        center;
+
+    opacity:
+        .55;
+
+    transition:
+        .25s ease;
 }
 
 
 #closeSearch:hover {
-    opacity: 1;
+
+    opacity:
+        1;
 
     transform:
         rotate(90deg);
@@ -496,20 +548,31 @@ body::after {
 ===================================================== */
 
 .search-box.loading {
-    pointer-events: none;
+
+    pointer-events:
+        none;
 }
 
 
 .search-box.loading::after {
-    content: "";
 
-    position: absolute;
+    content:
+        "";
 
-    left: 15%;
-    bottom: -1px;
+    position:
+        absolute;
 
-    width: 25%;
-    height: 1px;
+    left:
+        15%;
+
+    bottom:
+        -1px;
+
+    width:
+        25%;
+
+    height:
+        1px;
 
     background:
         linear-gradient(90deg,
@@ -541,20 +604,30 @@ body::after {
 ===================================================== */
 
 .content {
-    position: relative;
 
-    min-height: 100vh;
+    position:
+        relative;
+
+    min-height:
+        100vh;
+
+    min-height:
+        100svh;
 
     padding:
         115px 7% 170px;
 
-    display: flex;
+    display:
+        flex;
 
-    align-items: center;
+    align-items:
+        center;
 
-    justify-content: space-between;
+    justify-content:
+        space-between;
 
-    gap: 6vw;
+    gap:
+        6vw;
 }
 
 
@@ -563,7 +636,9 @@ body::after {
 ===================================================== */
 
 .intro {
-    max-width: 650px;
+
+    max-width:
+        650px;
 
     animation:
         introIn 1s cubic-bezier(.2, .8, .2, 1);
@@ -573,14 +648,18 @@ body::after {
 @keyframes introIn {
 
     from {
-        opacity: 0;
+
+        opacity:
+            0;
 
         transform:
             translateY(30px);
     }
 
     to {
-        opacity: 1;
+
+        opacity:
+            1;
 
         transform:
             translateY(0);
@@ -589,29 +668,43 @@ body::after {
 
 
 .eyebrow {
-    display: inline-flex;
 
-    align-items: center;
+    display:
+        inline-flex;
 
-    gap: 8px;
+    align-items:
+        center;
 
-    margin-bottom: 18px;
+    gap:
+        8px;
 
-    font-size: 10px;
+    margin-bottom:
+        18px;
 
-    letter-spacing: .24em;
+    font-size:
+        10px;
 
-    text-transform: uppercase;
+    letter-spacing:
+        .24em;
 
-    color: var(--muted);
+    text-transform:
+        uppercase;
+
+    color:
+        var(--muted);
 }
 
 
 .eyebrow::before {
-    content: "";
 
-    width: 28px;
-    height: 1px;
+    content:
+        "";
+
+    width:
+        28px;
+
+    height:
+        1px;
 
     background:
         rgba(255, 255, 255, .5);
@@ -619,16 +712,20 @@ body::after {
 
 
 h1 {
+
     font-size:
         clamp(64px,
             9vw,
             128px);
 
-    line-height: .82;
+    line-height:
+        .82;
 
-    font-weight: 700;
+    font-weight:
+        700;
 
-    letter-spacing: -.075em;
+    letter-spacing:
+        -.075em;
 
     text-shadow:
         0 10px 60px rgba(0, 0, 0, .35);
@@ -636,50 +733,66 @@ h1 {
 
 
 h1 em {
+
     font-family:
         Georgia,
         serif;
 
-    font-weight: 400;
+    font-weight:
+        400;
 }
 
 
 .sub {
-    margin-top: 28px;
 
-    max-width: 450px;
+    margin-top:
+        28px;
 
-    font-size: 13px;
+    max-width:
+        450px;
 
-    line-height: 1.7;
+    font-size:
+        13px;
 
-    color: var(--muted);
+    line-height:
+        1.7;
+
+    color:
+        var(--muted);
 }
 
 
 /* =====================================================
-   RESULTS CONTAINER
+   RESULTS
 ===================================================== */
 
 #songs {
-    max-height: 48vh;
 
-    overflow-y: auto;
+    max-height:
+        48vh;
 
-    scrollbar-width: thin;
+    overflow-y:
+        auto;
+
+    scrollbar-width:
+        thin;
 }
 
 
 #songs::-webkit-scrollbar {
-    width: 4px;
+
+    width:
+        4px;
 }
 
 
 #songs::-webkit-scrollbar-thumb {
+
     background:
         rgba(255, 255, 255, .20);
 
-    border-radius: 999px;
+    border-radius:
+        999px;
 }
 
 
@@ -688,29 +801,39 @@ h1 em {
 ===================================================== */
 
 .song {
-    position: relative;
 
-    overflow: hidden;
+    position:
+        relative;
 
-    display: flex;
+    overflow:
+        hidden;
 
-    align-items: center;
+    display:
+        flex;
 
-    gap: 14px;
+    align-items:
+        center;
+
+    gap:
+        14px;
 
     padding:
         13px 12px;
 
-    margin-bottom: 4px;
+    margin-bottom:
+        4px;
 
     border:
         1px solid transparent;
 
-    border-radius: 16px;
+    border-radius:
+        16px;
 
-    cursor: pointer;
+    cursor:
+        pointer;
 
     transition:
+
         transform .35s cubic-bezier(.2, .8, .2, 1),
 
         background .35s ease,
@@ -722,20 +845,28 @@ h1 em {
 
 
 /* =====================================================
-   SELECTED SONG — LIGHT SWEEP
+   SELECTED SONG LIGHT SWEEP
 ===================================================== */
 
 .song::before {
-    content: "";
 
-    position: absolute;
+    content:
+        "";
 
-    top: 0;
-    bottom: 0;
+    position:
+        absolute;
 
-    left: -100%;
+    top:
+        0;
 
-    width: 45%;
+    bottom:
+        0;
+
+    left:
+        -100%;
+
+    width:
+        45%;
 
     background:
         linear-gradient(90deg,
@@ -749,7 +880,8 @@ h1 em {
     transition:
         left .6s ease;
 
-    pointer-events: none;
+    pointer-events:
+        none;
 }
 
 
@@ -758,6 +890,7 @@ h1 em {
 ===================================================== */
 
 .song:hover {
+
     transform:
         translateX(5px);
 
@@ -774,6 +907,7 @@ h1 em {
 ===================================================== */
 
 .song.active {
+
     transform:
         translateX(6px);
 
@@ -798,7 +932,9 @@ h1 em {
 ===================================================== */
 
 .song.active::before {
-    left: 130%;
+
+    left:
+        130%;
 }
 
 
@@ -807,18 +943,27 @@ h1 em {
 ===================================================== */
 
 .song.active::after {
-    content: "";
 
-    position: absolute;
+    content:
+        "";
 
-    left: 0;
+    position:
+        absolute;
 
-    top: 20%;
-    bottom: 20%;
+    left:
+        0;
 
-    width: 2px;
+    top:
+        20%;
 
-    border-radius: 999px;
+    bottom:
+        20%;
+
+    width:
+        2px;
+
+    border-radius:
+        999px;
 
     background:
         rgba(255, 255, 255, .9);
@@ -838,11 +983,15 @@ h1 em {
 
     0%,
     100% {
-        opacity: .45;
+
+        opacity:
+            .45;
     }
 
     50% {
-        opacity: 1;
+
+        opacity:
+            1;
     }
 }
 
@@ -852,7 +1001,9 @@ h1 em {
 ===================================================== */
 
 .num {
-    width: 26px;
+
+    width:
+        26px;
 
     flex:
         0 0 26px;
@@ -860,7 +1011,8 @@ h1 em {
     color:
         rgba(255, 255, 255, .35);
 
-    font-size: 10px;
+    font-size:
+        10px;
 }
 
 
@@ -869,81 +1021,110 @@ h1 em {
 ===================================================== */
 
 .song-info {
-    flex: 1;
 
-    min-width: 0;
+    flex:
+        1;
+
+    min-width:
+        0;
 }
 
 
 .song-title {
-    display: block;
 
-    overflow: hidden;
+    display:
+        block;
 
-    white-space: nowrap;
+    overflow:
+        hidden;
 
-    text-overflow: ellipsis;
+    white-space:
+        nowrap;
 
-    font-size: 13px;
+    text-overflow:
+        ellipsis;
+
+    font-size:
+        13px;
 }
 
 
 .song-artist {
-    display: block;
 
-    margin-top: 4px;
+    display:
+        block;
+
+    margin-top:
+        4px;
 
     color:
         rgba(255, 255, 255, .58);
 
-    font-size: 10px;
+    font-size:
+        10px;
 }
 
 
 .song-channel {
-    display: block;
 
-    margin-top: 3px;
+    display:
+        block;
 
-    overflow: hidden;
+    margin-top:
+        3px;
 
-    white-space: nowrap;
+    overflow:
+        hidden;
 
-    text-overflow: ellipsis;
+    white-space:
+        nowrap;
+
+    text-overflow:
+        ellipsis;
 
     color:
         rgba(255, 255, 255, .34);
 
-    font-size: 9px;
+    font-size:
+        9px;
 }
 
 
 /* =====================================================
-   SONG PLAY BUTTON
+   SONG BUTTON
 ===================================================== */
 
 .song button {
-    width: 34px;
-    height: 34px;
+
+    width:
+        34px;
+
+    height:
+        34px;
 
     flex:
         0 0 34px;
 
-    display: grid;
+    display:
+        grid;
 
-    place-items: center;
+    place-items:
+        center;
 
     border:
         1px solid rgba(255, 255, 255, .12);
 
-    border-radius: 50%;
+    border-radius:
+        50%;
 
     background:
         rgba(255, 255, 255, .075);
 
-    color: white;
+    color:
+        white;
 
-    cursor: pointer;
+    cursor:
+        pointer;
 
     transition:
         .25s ease;
@@ -951,6 +1132,7 @@ h1 em {
 
 
 .song button:hover {
+
     background:
         rgba(255, 255, 255, .18);
 
@@ -964,10 +1146,12 @@ h1 em {
 ===================================================== */
 
 .empty-state {
+
     padding:
         35px 20px;
 
-    text-align: center;
+    text-align:
+        center;
 
     color:
         var(--muted);
@@ -975,17 +1159,22 @@ h1 em {
 
 
 .empty-state h3 {
-    margin-bottom: 8px;
+
+    margin-bottom:
+        8px;
 
     color:
         rgba(255, 255, 255, .88);
 
-    font-size: 14px;
+    font-size:
+        14px;
 }
 
 
 .empty-state p {
-    font-size: 11px;
+
+    font-size:
+        11px;
 }
 
 
@@ -994,6 +1183,7 @@ h1 em {
 ===================================================== */
 
 .retry-button {
+
     border:
         1px solid rgba(255, 255, 255, .16);
 
@@ -1006,9 +1196,11 @@ h1 em {
     background:
         rgba(255, 255, 255, .08);
 
-    color: white;
+    color:
+        white;
 
-    cursor: pointer;
+    cursor:
+        pointer;
 
     transition:
         .25s ease;
@@ -1016,6 +1208,7 @@ h1 em {
 
 
 .retry-button:hover {
+
     background:
         rgba(255, 255, 255, .15);
 
@@ -1029,28 +1222,34 @@ h1 em {
 ===================================================== */
 
 .player {
-    position: fixed;
 
-    left: 18px;
-    right: 18px;
+    position:
+        fixed;
 
-    bottom: 18px;
+    left:
+        18px;
 
-    z-index: 70;
+    right:
+        18px;
 
-    display: grid;
+    bottom:
+        18px;
 
-    /*
-        SONG       CONTROLS       TIMELINE       VOLUME
-        210px       150px          FLEXIBLE       130px
-    */
+    z-index:
+        70;
+
+    display:
+        grid;
 
     grid-template-columns:
+
         210px 150px minmax(220px, 1fr) 130px;
 
-    align-items: center;
+    align-items:
+        center;
 
-    gap: 18px;
+    gap:
+        18px;
 
     padding:
         10px 14px;
@@ -1058,7 +1257,8 @@ h1 em {
     border:
         1px solid rgba(255, 255, 255, .17);
 
-    border-radius: 22px;
+    border-radius:
+        22px;
 
     background:
         linear-gradient(110deg,
@@ -1077,7 +1277,8 @@ h1 em {
 
         inset 0 1px 0 rgba(255, 255, 255, .12);
 
-    overflow: hidden;
+    overflow:
+        hidden;
 }
 
 
@@ -1086,17 +1287,27 @@ h1 em {
 ===================================================== */
 
 .player::before {
-    content: "";
 
-    position: absolute;
+    content:
+        "";
 
-    width: 180px;
-    height: 180px;
+    position:
+        absolute;
 
-    right: 15%;
-    top: -130px;
+    width:
+        180px;
 
-    border-radius: 50%;
+    height:
+        180px;
+
+    right:
+        15%;
+
+    top:
+        -130px;
+
+    border-radius:
+        50%;
 
     background:
         rgba(150, 160, 255, .12);
@@ -1104,7 +1315,8 @@ h1 em {
     filter:
         blur(45px);
 
-    pointer-events: none;
+    pointer-events:
+        none;
 
     animation:
         playerGlow 7s ease-in-out infinite alternate;
@@ -1114,11 +1326,13 @@ h1 em {
 @keyframes playerGlow {
 
     from {
+
         transform:
             translateX(-25px);
     }
 
     to {
+
         transform:
             translateX(35px);
     }
@@ -1130,21 +1344,33 @@ h1 em {
 ===================================================== */
 
 .now {
-    position: relative;
 
-    width: 210px;
-    min-width: 210px;
-    max-width: 210px;
+    position:
+        relative;
 
-    display: flex;
+    width:
+        210px;
 
-    align-items: center;
+    min-width:
+        210px;
 
-    gap: 9px;
+    max-width:
+        210px;
 
-    overflow: hidden;
+    display:
+        flex;
 
-    z-index: 2;
+    align-items:
+        center;
+
+    gap:
+        9px;
+
+    overflow:
+        hidden;
+
+    z-index:
+        2;
 }
 
 
@@ -1153,19 +1379,27 @@ h1 em {
 ===================================================== */
 
 .cover {
-    width: 36px;
-    height: 36px;
+
+    width:
+        36px;
+
+    height:
+        36px;
 
     flex:
         0 0 36px;
 
-    display: grid;
+    display:
+        grid;
 
-    place-items: center;
+    place-items:
+        center;
 
-    overflow: hidden;
+    overflow:
+        hidden;
 
-    border-radius: 10px;
+    border-radius:
+        10px;
 
     background:
         linear-gradient(135deg,
@@ -1175,11 +1409,14 @@ h1 em {
     border:
         1px solid rgba(255, 255, 255, .15);
 
-    font-size: 9px;
+    font-size:
+        9px;
 
-    font-weight: 700;
+    font-weight:
+        700;
 
-    letter-spacing: .08em;
+    letter-spacing:
+        .08em;
 }
 
 
@@ -1188,48 +1425,68 @@ h1 em {
 ===================================================== */
 
 .now>div:last-child {
-    min-width: 0;
 
-    width: 155px;
+    min-width:
+        0;
+
+    width:
+        155px;
 }
 
 
 .now strong {
-    display: block;
 
-    width: 155px;
+    display:
+        block;
 
-    overflow: hidden;
+    width:
+        155px;
 
-    white-space: nowrap;
+    overflow:
+        hidden;
 
-    text-overflow: ellipsis;
+    white-space:
+        nowrap;
 
-    font-size: 10px;
+    text-overflow:
+        ellipsis;
 
-    line-height: 1.3;
+    font-size:
+        10px;
 
-    font-weight: 600;
+    line-height:
+        1.3;
+
+    font-weight:
+        600;
 }
 
 
 .now small {
-    display: block;
 
-    width: 155px;
+    display:
+        block;
 
-    margin-top: 3px;
+    width:
+        155px;
 
-    overflow: hidden;
+    margin-top:
+        3px;
 
-    white-space: nowrap;
+    overflow:
+        hidden;
 
-    text-overflow: ellipsis;
+    white-space:
+        nowrap;
+
+    text-overflow:
+        ellipsis;
 
     color:
         rgba(255, 255, 255, .48);
 
-    font-size: 8px;
+    font-size:
+        8px;
 }
 
 
@@ -1238,37 +1495,55 @@ h1 em {
 ===================================================== */
 
 .controls {
-    width: 150px;
 
-    display: flex;
+    width:
+        150px;
 
-    align-items: center;
+    display:
+        flex;
 
-    justify-content: center;
+    align-items:
+        center;
 
-    gap: 2px;
+    justify-content:
+        center;
 
-    z-index: 2;
+    gap:
+        2px;
+
+    z-index:
+        2;
 }
 
 
 .controls button {
-    width: 34px;
-    height: 34px;
 
-    display: grid;
+    width:
+        34px;
 
-    place-items: center;
+    height:
+        34px;
 
-    border: 0;
+    display:
+        grid;
 
-    border-radius: 50%;
+    place-items:
+        center;
 
-    background: transparent;
+    border:
+        0;
 
-    color: white;
+    border-radius:
+        50%;
 
-    cursor: pointer;
+    background:
+        transparent;
+
+    color:
+        white;
+
+    cursor:
+        pointer;
 
     transition:
         .22s ease;
@@ -1276,6 +1551,7 @@ h1 em {
 
 
 .controls button:hover {
+
     background:
         rgba(255, 255, 255, .10);
 
@@ -1285,8 +1561,12 @@ h1 em {
 
 
 .controls .play {
-    width: 42px;
-    height: 42px;
+
+    width:
+        42px;
+
+    height:
+        42px;
 
     margin:
         0 4px;
@@ -1294,7 +1574,8 @@ h1 em {
     background:
         rgba(255, 255, 255, .96);
 
-    color: #111;
+    color:
+        #111;
 }
 
 
@@ -1303,58 +1584,81 @@ h1 em {
 ===================================================== */
 
 .timeline {
-    min-width: 0;
 
-    display: flex;
+    min-width:
+        0;
 
-    align-items: center;
+    display:
+        flex;
 
-    gap: 8px;
+    align-items:
+        center;
 
-    font-size: 8px;
+    gap:
+        8px;
+
+    font-size:
+        8px;
 
     color:
         rgba(255, 255, 255, .45);
 
-    z-index: 2;
+    z-index:
+        2;
 }
 
 
 /* =====================================================
-   RANGE INPUT
+   RANGE
 ===================================================== */
 
 input[type="range"] {
-    width: 100%;
 
-    height: 3px;
+    width:
+        100%;
 
-    appearance: none;
+    height:
+        3px;
 
-    -webkit-appearance: none;
+    appearance:
+        none;
 
-    cursor: pointer;
+    -webkit-appearance:
+        none;
 
-    border-radius: 999px;
+    cursor:
+        pointer;
+
+    border-radius:
+        999px;
 
     background:
         rgba(255, 255, 255, .16);
 
-    outline: none;
+    outline:
+        none;
 }
 
 
 input[type="range"]::-webkit-slider-thumb {
-    appearance: none;
 
-    -webkit-appearance: none;
+    appearance:
+        none;
 
-    width: 10px;
-    height: 10px;
+    -webkit-appearance:
+        none;
 
-    border-radius: 50%;
+    width:
+        10px;
 
-    background: white;
+    height:
+        10px;
+
+    border-radius:
+        50%;
+
+    background:
+        white;
 
     box-shadow:
         0 0 8px rgba(255, 255, 255, .35);
@@ -1362,14 +1666,21 @@ input[type="range"]::-webkit-slider-thumb {
 
 
 input[type="range"]::-moz-range-thumb {
-    width: 10px;
-    height: 10px;
 
-    border: 0;
+    width:
+        10px;
 
-    border-radius: 50%;
+    height:
+        10px;
 
-    background: white;
+    border:
+        0;
+
+    border-radius:
+        50%;
+
+    background:
+        white;
 }
 
 
@@ -1378,20 +1689,28 @@ input[type="range"]::-moz-range-thumb {
 ===================================================== */
 
 .volume {
-    width: 130px;
 
-    display: flex;
+    width:
+        130px;
 
-    align-items: center;
+    display:
+        flex;
 
-    gap: 7px;
+    align-items:
+        center;
 
-    z-index: 2;
+    gap:
+        7px;
+
+    z-index:
+        2;
 }
 
 
 .volume input {
-    width: 80px;
+
+    width:
+        80px;
 }
 
 
@@ -1400,36 +1719,56 @@ input[type="range"]::-moz-range-thumb {
 ===================================================== */
 
 .icon {
-    width: 17px;
-    height: 17px;
 
-    display: block;
+    width:
+        17px;
 
-    fill: none;
+    height:
+        17px;
 
-    stroke: currentColor;
+    display:
+        block;
 
-    stroke-width: 1.8;
+    fill:
+        none;
 
-    stroke-linecap: round;
+    stroke:
+        currentColor;
 
-    stroke-linejoin: round;
+    stroke-width:
+        1.8;
+
+    stroke-linecap:
+        round;
+
+    stroke-linejoin:
+        round;
 }
 
 
 .icon-small {
-    width: 14px;
-    height: 14px;
+
+    width:
+        14px;
+
+    height:
+        14px;
 }
 
 
 .icon-play {
-    width: 15px;
-    height: 15px;
 
-    fill: currentColor;
+    width:
+        15px;
 
-    stroke: none;
+    height:
+        15px;
+
+    fill:
+        currentColor;
+
+    stroke:
+        none;
 }
 
 
@@ -1438,175 +1777,909 @@ input[type="range"]::-moz-range-thumb {
 ===================================================== */
 
 .youtube-player {
-    position: fixed;
 
-    width: 1px;
-    height: 1px;
+    position:
+        fixed;
 
-    left: -10px;
-    bottom: -10px;
+    width:
+        1px;
 
-    opacity: .01;
+    height:
+        1px;
 
-    pointer-events: none;
+    left:
+        -10px;
+
+    bottom:
+        -10px;
+
+    opacity:
+        .01;
+
+    pointer-events:
+        none;
 }
 
 
 /* =====================================================
-   MOBILE — 900px
+   TABLET — 900px
 ===================================================== */
 
 @media (max-width: 900px) {
 
-    .content {
+    .topbar {
+
+        height:
+            70px;
+
         padding:
-            110px 5% 165px;
+            0 22px;
+    }
 
-        flex-direction: column;
 
-        align-items: flex-start;
+    .brand {
 
-        justify-content: center;
+        font-size:
+            10px;
+
+        letter-spacing:
+            .18em;
+    }
+
+
+    .status {
+
+        font-size:
+            8px;
+
+        letter-spacing:
+            .12em;
+    }
+
+
+    .status span {
+
+        width:
+            6px;
+
+        height:
+            6px;
+
+        margin-right:
+            6px;
+    }
+
+
+    #openSearch {
+
+        top:
+            14px;
+
+        width:
+            40px;
+
+        height:
+            40px;
+    }
+
+
+    #topSearch {
+
+        top:
+            68px;
+
+        width:
+            min(500px,
+                calc(100vw - 32px));
+    }
+
+
+    .content {
+
+        min-height:
+            100svh;
+
+        padding:
+            100px 5% 170px;
+
+        display:
+            flex;
+
+        flex-direction:
+            column;
+
+        align-items:
+            flex-start;
+
+        justify-content:
+            center;
+
+        gap:
+            40px;
+    }
+
+
+    .intro {
+
+        width:
+            100%;
+
+        max-width:
+            650px;
     }
 
 
     h1 {
+
         font-size:
-            clamp(62px,
-                15vw,
-                100px);
+            clamp(64px,
+                14vw,
+                105px);
+    }
+
+
+    .sub {
+
+        max-width:
+            480px;
+
+        font-size:
+            12px;
+    }
+
+
+    .results-section {
+
+        width:
+            100%;
+
+        max-width:
+            650px;
+    }
+
+
+    #songs {
+
+        width:
+            100%;
+
+        max-height:
+            42vh;
     }
 
 
     .player {
-        grid-template-columns:
-            1fr auto;
 
-        gap: 5px;
+        left:
+            12px;
+
+        right:
+            12px;
+
+        bottom:
+            12px;
+
+        grid-template-columns:
+            minmax(0, 1fr) auto;
+
+        gap:
+            6px;
 
         padding:
             9px 11px;
+
+        border-radius:
+            18px;
     }
 
 
     .now {
-        width: 100%;
 
-        min-width: 0;
+        width:
+            100%;
 
-        max-width: none;
+        min-width:
+            0;
+
+        max-width:
+            none;
     }
 
 
-    .now>div:last-child,
+    .now>div:last-child {
+
+        width:
+            100%;
+
+        min-width:
+            0;
+    }
+
+
     .now strong,
     .now small {
-        width: 100%;
+
+        width:
+            100%;
     }
 
 
     .controls {
-        width: auto;
-    }
 
+        width:
+            auto;
 
-    .timeline {
-        grid-column:
-            1 / -1;
-
-        grid-row: 2;
+        flex-shrink:
+            0;
     }
 
 
     .volume {
-        display: none;
+
+        display:
+            none;
+    }
+
+
+    .timeline {
+
+        grid-column:
+            1 / -1;
+
+        grid-row:
+            2;
+
+        width:
+            100%;
+
+        padding:
+            0 2px 2px;
     }
 
 }
 
 
 /* =====================================================
-   MOBILE — 560px
+   MOBILE — 600px
 ===================================================== */
 
-@media (max-width: 560px) {
+@media (max-width: 600px) {
+
+    body {
+
+        overflow-x:
+            hidden;
+    }
+
 
     .topbar {
-        height: 70px;
+
+        height:
+            64px;
 
         padding:
-            0 18px;
+            0 16px;
     }
 
 
     .brand {
-        font-size: 10px;
+
+        font-size:
+            9px;
+
+        letter-spacing:
+            .16em;
     }
 
 
     .status {
-        font-size: 8px;
+
+        font-size:
+            7px;
+
+        letter-spacing:
+            .09em;
+    }
+
+
+    .status span {
+
+        width:
+            6px;
+
+        height:
+            6px;
+
+        margin-right:
+            5px;
     }
 
 
     #openSearch {
-        top: 14px;
+
+        top:
+            12px;
+
+        width:
+            38px;
+
+        height:
+            38px;
     }
 
 
     #topSearch {
-        top: 70px;
+
+        top:
+            62px;
 
         width:
-            calc(100vw - 30px);
+            calc(100vw - 24px);
+    }
+
+
+    .search-box {
+
+        padding:
+            6px 7px 6px 15px;
+
+        border-radius:
+            18px;
+    }
+
+
+    #search {
+
+        font-size:
+            13px;
+
+        padding:
+            10px 0;
+    }
+
+
+    #searchButton {
+
+        width:
+            35px;
+
+        height:
+            35px;
+    }
+
+
+    #closeSearch {
+
+        width:
+            31px;
+
+        height:
+            31px;
     }
 
 
     .content {
+
+        min-height:
+            100svh;
+
         padding:
-            95px 20px 150px;
+            90px 16px 155px;
+
+        gap:
+            30px;
+
+        justify-content:
+            flex-start;
+    }
+
+
+    .eyebrow {
+
+        margin-bottom:
+            14px;
+
+        font-size:
+            8px;
+
+        letter-spacing:
+            .18em;
+    }
+
+
+    .eyebrow::before {
+
+        width:
+            20px;
     }
 
 
     h1 {
-        font-size: 62px;
+
+        font-size:
+            clamp(58px,
+                18vw,
+                82px);
+
+        line-height:
+            .84;
+
+        letter-spacing:
+            -.065em;
     }
 
 
-    .player {
-        left: 8px;
+    .sub {
 
-        right: 8px;
+        margin-top:
+            20px;
 
-        bottom: 8px;
+        max-width:
+            330px;
 
-        border-radius: 18px;
+        font-size:
+            11px;
+
+        line-height:
+            1.65;
     }
 
 
-    .cover {
-        width: 34px;
-        height: 34px;
+    .results-section {
 
-        flex-basis: 34px;
+        width:
+            100%;
     }
 
 
-    .controls button {
-        width: 30px;
-        height: 30px;
-    }
+    #songs {
 
+        width:
+            100%;
 
-    .controls .play {
-        width: 38px;
-        height: 38px;
+        max-height:
+            38vh;
     }
 
 
     .song {
+
+        gap:
+            10px;
+
         padding:
-            12px 10px;
+            11px 9px;
+
+        border-radius:
+            13px;
+    }
+
+
+    .song:hover {
+
+        transform:
+            translateX(2px);
+    }
+
+
+    .song.active {
+
+        transform:
+            translateX(3px);
+    }
+
+
+    .num {
+
+        width:
+            21px;
+
+        flex-basis:
+            21px;
+
+        font-size:
+            9px;
+    }
+
+
+    .song-title {
+
+        font-size:
+            12px;
+    }
+
+
+    .song-artist {
+
+        font-size:
+            9px;
+    }
+
+
+    .song-channel {
+
+        font-size:
+            8px;
+    }
+
+
+    .song button {
+
+        width:
+            31px;
+
+        height:
+            31px;
+
+        flex-basis:
+            31px;
+    }
+
+
+    .player {
+
+        left:
+            7px;
+
+        right:
+            7px;
+
+        bottom:
+            7px;
+
+        padding:
+            8px 9px;
+
+        border-radius:
+            16px;
+
+        gap:
+            3px;
+    }
+
+
+    .now {
+
+        gap:
+            8px;
+    }
+
+
+    .cover {
+
+        width:
+            34px;
+
+        height:
+            34px;
+
+        flex:
+            0 0 34px;
+
+        border-radius:
+            9px;
+
+        font-size:
+            8px;
+    }
+
+
+    .now strong {
+
+        font-size:
+            9px;
+    }
+
+
+    .now small {
+
+        font-size:
+            7px;
+    }
+
+
+    .controls {
+
+        gap:
+            0;
+    }
+
+
+    .controls button {
+
+        width:
+            30px;
+
+        height:
+            30px;
+    }
+
+
+    .controls .play {
+
+        width:
+            36px;
+
+        height:
+            36px;
+
+        margin:
+            0 2px;
+    }
+
+
+    .timeline {
+
+        gap:
+            6px;
+
+        font-size:
+            7px;
+
+        padding:
+            0 1px 1px;
+    }
+
+
+    input[type="range"] {
+
+        height:
+            3px;
+    }
+
+
+    input[type="range"]::-webkit-slider-thumb {
+
+        width:
+            9px;
+
+        height:
+            9px;
+    }
+
+}
+
+
+/* =====================================================
+   SMALL PHONES — 380px
+===================================================== */
+
+@media (max-width: 380px) {
+
+    .topbar {
+
+        padding:
+            0 12px;
+    }
+
+
+    .status {
+
+        display:
+            none;
+    }
+
+
+    #openSearch {
+
+        width:
+            36px;
+
+        height:
+            36px;
+
+        top:
+            13px;
+    }
+
+
+    .content {
+
+        padding:
+            85px 13px 150px;
+    }
+
+
+    h1 {
+
+        font-size:
+            56px;
+    }
+
+
+    .sub {
+
+        font-size:
+            10px;
+
+        max-width:
+            290px;
+    }
+
+
+    .song {
+
+        padding:
+            10px 7px;
+    }
+
+
+    .song-title {
+
+        font-size:
+            11px;
+    }
+
+
+    .player {
+
+        left:
+            5px;
+
+        right:
+            5px;
+
+        bottom:
+            5px;
+
+        padding:
+            7px;
+
+        border-radius:
+            14px;
+    }
+
+
+    .cover {
+
+        width:
+            31px;
+
+        height:
+            31px;
+
+        flex-basis:
+            31px;
+    }
+
+
+    .now strong {
+
+        font-size:
+            8px;
+    }
+
+
+    .now small {
+
+        font-size:
+            6px;
+    }
+
+
+    .controls button {
+
+        width:
+            27px;
+
+        height:
+            27px;
+    }
+
+
+    .controls .play {
+
+        width:
+            33px;
+
+        height:
+            33px;
+    }
+
+}
+
+
+/* =====================================================
+   MOBILE LANDSCAPE
+===================================================== */
+
+@media (max-height: 500px) and (orientation: landscape) {
+
+    .content {
+
+        padding-top:
+            80px;
+
+        padding-bottom:
+            120px;
+
+        flex-direction:
+            row;
+
+        align-items:
+            center;
+
+        gap:
+            25px;
+    }
+
+
+    .intro {
+
+        max-width:
+            45vw;
+    }
+
+
+    h1 {
+
+        font-size:
+            clamp(45px,
+                10vw,
+                75px);
+    }
+
+
+    .sub {
+
+        margin-top:
+            12px;
+    }
+
+
+    .results-section {
+
+        width:
+            45vw;
+    }
+
+
+    #songs {
+
+        max-height:
+            55vh;
+    }
+
+}
+
+
+/* =====================================================
+   TOUCH DEVICES
+===================================================== */
+
+@media (hover: none) {
+
+    .song:hover {
+
+        transform:
+            none;
+
+        background:
+            transparent;
+
+        border-color:
+            transparent;
+    }
+
+
+    .song.active {
+
+        transform:
+            translateX(3px);
+    }
+
+
+    #openSearch:hover {
+
+        transform:
+            translateX(-50%);
+    }
+
+
+    .song button:hover {
+
+        transform:
+            none;
     }
 
 }

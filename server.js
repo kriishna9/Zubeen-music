@@ -1,52 +1,42 @@
+a/* =====================================================
+   ZUBEEN MUSIC SERVER
+   FINAL API SERVER
+===================================================== */
+
 const express = require("express");
 const path = require("path");
 const rateLimit = require("express-rate-limit");
 require("dotenv").config();
 
-const app = express();
-
 
 /* =====================================================
-   CONFIG
+   APP
 ===================================================== */
 
-const PORT =
-    process.env.PORT || 5500;
+const app = express();
+
+const PORT = process.env.PORT || 5500;
 
 const API_KEY =
     process.env.YOUTUBE_API_KEY;
 
 
-/*
-    Cache duration
+/* =====================================================
+   CONFIGURATION
+===================================================== */
 
-    30 minutes
+const DAILY_LIMIT = 80;
+
+/*
+    Cache search results for 10 minutes.
+
+    If multiple users search the same thing,
+    we can return the cached result instead of
+    making another YouTube API request.
 */
 
 const CACHE_TIME =
-    30 * 60 * 1000;
-
-
-/*
-    Keep old results for fallback
-
-    24 hours
-*/
-
-const STALE_CACHE_TIME =
-    24 * 60 * 60 * 1000;
-
-
-/*
-    Maximum YouTube search requests
-    from this server per day.
-
-    search.list = 100 quota units.
-
-    80 × 100 = 8000 units.
-*/
-
-const DAILY_SEARCH_LIMIT = 80;
+    10 * 60 * 1000;
 
 
 /* =====================================================
@@ -55,71 +45,83 @@ const DAILY_SEARCH_LIMIT = 80;
 
 if (!API_KEY) {
 
-    console.error("");
     console.error(
-        "❌ YOUTUBE_API_KEY not found"
+        "❌ YOUTUBE_API_KEY not found in .env"
     );
-
-    console.error(
-        "Create a .env file with:"
-    );
-
-    console.error(
-        "YOUTUBE_API_KEY=YOUR_API_KEY"
-    );
-
-    console.error("");
 
     process.exit(1);
-
 }
 
 
 /* =====================================================
-   SEARCH CACHE
+   DAILY USAGE
 ===================================================== */
 
-const searchCache =
-    new Map();
+let usage = {
+
+    date:
+        getPacificDate(),
+
+    count:
+        0
+
+};
 
 
 /* =====================================================
-   DAILY SEARCH COUNTER
+   PACIFIC DATE
 ===================================================== */
 
-let dailySearchCount = 0;
+function getPacificDate() {
 
-let dailySearchDate =
-    new Date()
-        .toISOString()
-        .slice(0, 10);
+    return new Intl.DateTimeFormat(
+        "en-CA",
+        {
+            timeZone:
+                "America/Los_Angeles",
+
+            year:
+                "numeric",
+
+            month:
+                "2-digit",
+
+            day:
+                "2-digit"
+        }
+    ).format(
+        new Date()
+    );
+}
 
 
 /* =====================================================
    RESET DAILY COUNTER
 ===================================================== */
 
-function resetDailyCounter() {
+function resetDailyUsageIfNeeded() {
 
     const today =
-        new Date()
-            .toISOString()
-            .slice(0, 10);
+        getPacificDate();
 
 
     if (
-        today !==
-        dailySearchDate
+        usage.date !== today
     ) {
 
-        dailySearchDate =
+        usage.date =
             today;
 
-        dailySearchCount =
+        usage.count =
             0;
+
 
         console.log(
             "🔄 Daily YouTube search counter reset"
+        );
+
+        console.log(
+            `📅 Pacific date: ${today}`
         );
 
     }
@@ -128,75 +130,95 @@ function resetDailyCounter() {
 
 
 /* =====================================================
-   CHECK DAILY SEARCH BUDGET
+   CACHE
 ===================================================== */
 
-function canUseYouTubeSearch() {
+const searchCache =
+    new Map();
 
-    resetDailyCounter();
+
+/* =====================================================
+   CLEAN OLD CACHE
+===================================================== */
+
+function cleanCache() {
+
+    const now =
+        Date.now();
 
 
-    return (
-        dailySearchCount <
-        DAILY_SEARCH_LIMIT
-    );
+    for (
+        const [
+            key,
+            value
+        ]
+        of searchCache
+    ) {
+
+        if (
+            now -
+            value.timestamp
+            >
+            CACHE_TIME
+        ) {
+
+            searchCache.delete(
+                key
+            );
+
+        }
+
+    }
 
 }
 
 
 /* =====================================================
-   RECORD YOUTUBE SEARCH
-===================================================== */
-
-function recordYouTubeSearch() {
-
-    resetDailyCounter();
-
-    dailySearchCount++;
-
-
-    console.log(
-        `📊 YouTube searches today: ${dailySearchCount}/${DAILY_SEARCH_LIMIT}`
-    );
-
-}
-
-
-/* =====================================================
-   MIDDLEWARE
+   EXPRESS MIDDLEWARE
 ===================================================== */
 
 app.use(
-    express.json({
-        limit: "10kb"
-    })
-);
-
-
-app.use(
-    express.static(
-        path.join(__dirname)
+    express.json(
+        {
+            limit:
+                "50kb"
+        }
     )
 );
 
 
 /* =====================================================
-   RATE LIMITER
+   STATIC WEBSITE
 ===================================================== */
 
-const searchLimiter =
+app.use(
+    express.static(
+        path.join(
+            __dirname
+        )
+    )
+);
+
+
+/* =====================================================
+   GENERAL API RATE LIMIT
+===================================================== */
+
+/*
+    Prevent one IP from spamming
+    the search endpoint.
+
+    30 requests per minute per IP.
+*/
+
+const searchRateLimit =
     rateLimit({
 
         windowMs:
             60 * 1000,
 
-        /*
-            Maximum 20 searches
-            per IP per minute.
-        */
-
         max:
-            20,
+            30,
 
         standardHeaders:
             true,
@@ -206,77 +228,12 @@ const searchLimiter =
 
         message: {
 
-            success:
-                false,
-
             error:
-                "Too many searches.",
-
-            message:
-                "Please wait a minute and try again.",
-
-            results:
-                []
+                "Too many search requests. Please wait a moment."
 
         }
 
     });
-
-
-/* =====================================================
-   CACHE CLEANUP
-===================================================== */
-
-setInterval(
-    () => {
-
-        const now =
-            Date.now();
-
-
-        let removed =
-            0;
-
-
-        for (
-            const [
-                key,
-                value
-            ]
-            of searchCache
-        ) {
-
-            if (
-                now -
-                value.timestamp
-                >
-                STALE_CACHE_TIME
-            ) {
-
-                searchCache.delete(
-                    key
-                );
-
-                removed++;
-
-            }
-
-        }
-
-
-        if (
-            removed > 0
-        ) {
-
-            console.log(
-                `🧹 Cache cleanup: ${removed} old entries removed`
-            );
-
-        }
-
-    },
-    30 * 60 * 1000
-);
 
 
 /* =====================================================
@@ -306,7 +263,7 @@ app.get(
     "/api/health",
     (req, res) => {
 
-        resetDailyCounter();
+        resetDailyUsageIfNeeded();
 
 
         res.json({
@@ -318,20 +275,28 @@ app.get(
                 "online",
 
             youtubeConfigured:
-                Boolean(API_KEY),
+                Boolean(
+                    API_KEY
+                ),
 
-            dailySearchesUsed:
-                dailySearchCount,
+            dailyLimit:
+                DAILY_LIMIT,
 
-            dailySearchLimit:
-                DAILY_SEARCH_LIMIT,
+            searchesUsed:
+                usage.count,
 
-            cacheEntries:
-                searchCache.size,
+            searchesRemaining:
+                Math.max(
+                    0,
+                    DAILY_LIMIT -
+                    usage.count
+                ),
+
+            date:
+                usage.date,
 
             timestamp:
-                new Date()
-                    .toISOString()
+                new Date().toISOString()
 
         });
 
@@ -340,174 +305,86 @@ app.get(
 
 
 /* =====================================================
-   YOUTUBE FETCH WITH TIMEOUT
-===================================================== */
-
-async function fetchYouTube(
-    url
-) {
-
-    const controller =
-        new AbortController();
-
-
-    /*
-        8 second timeout
-    */
-
-    const timeout =
-        setTimeout(
-            () => {
-
-                controller.abort();
-
-            },
-            8000
-        );
-
-
-    try {
-
-        const response =
-            await fetch(
-                url,
-                {
-
-                    method:
-                        "GET",
-
-                    signal:
-                        controller.signal,
-
-                    headers: {
-
-                        Accept:
-                            "application/json"
-
-                    }
-
-                }
-            );
-
-
-        return response;
-
-    }
-
-    finally {
-
-        clearTimeout(
-            timeout
-        );
-
-    }
-
-}
-
-
-/* =====================================================
-   SEARCH
+   YOUTUBE SEARCH
 ===================================================== */
 
 app.get(
     "/api/search",
-    searchLimiter,
+    searchRateLimit,
+
     async (req, res) => {
 
-        /* =================================================
-           QUERY
-        ================================================= */
+        /* ---------------------------------------------
+           RESET CHECK
+        --------------------------------------------- */
 
-        let query =
+        resetDailyUsageIfNeeded();
+
+
+        /* ---------------------------------------------
+           QUERY
+        --------------------------------------------- */
+
+        const query =
             String(
-                req.query.q || ""
+                req.query.q ||
+                ""
             ).trim();
 
 
-        /* =================================================
+        /* ---------------------------------------------
            EMPTY QUERY
-        ================================================= */
+        --------------------------------------------- */
 
-        if (
-            !query
-        ) {
+        if (!query) {
 
             return res
                 .status(400)
                 .json({
 
-                    success:
-                        false,
-
                     error:
-                        "Search query is required.",
-
-                    results:
-                        []
+                        "Search query is required"
 
                 });
 
         }
 
 
-        /* =================================================
-           MINIMUM LENGTH
-        ================================================= */
+        /* ---------------------------------------------
+           QUERY LENGTH
+        --------------------------------------------- */
 
         if (
-            query.length < 2
+            query.length >
+            100
         ) {
 
             return res
                 .status(400)
                 .json({
 
-                    success:
-                        false,
-
                     error:
-                        "Please enter at least 2 characters.",
-
-                    results:
-                        []
+                        "Search query is too long"
 
                 });
 
         }
 
 
-        /* =================================================
-           MAXIMUM LENGTH
-        ================================================= */
+        /* ---------------------------------------------
+           CACHE CLEANUP
+        --------------------------------------------- */
 
-        if (
-            query.length > 100
-        ) {
-
-            return res
-                .status(400)
-                .json({
-
-                    success:
-                        false,
-
-                    error:
-                        "Search query is too long.",
-
-                    results:
-                        []
-
-                });
-
-        }
+        cleanCache();
 
 
-        /* =================================================
-           CLEAN QUERY
-        ================================================= */
+        /* ---------------------------------------------
+           CACHE KEY
+        --------------------------------------------- */
 
-        query =
+        const cacheKey =
             query
+                .toLowerCase()
                 .replace(
                     /\s+/g,
                     " "
@@ -515,17 +392,9 @@ app.get(
                 .trim();
 
 
-        /*
-            Cache key is lowercase.
-        */
-
-        const cacheKey =
-            query.toLowerCase();
-
-
-        /* =================================================
-           CACHE CHECK
-        ================================================= */
+        /* ---------------------------------------------
+           RETURN CACHE
+        --------------------------------------------- */
 
         const cached =
             searchCache.get(
@@ -534,121 +403,82 @@ app.get(
 
 
         if (
-            cached
+            cached &&
+            Date.now() -
+            cached.timestamp
+            <
+            CACHE_TIME
         ) {
 
-            const age =
-                Date.now() -
-                cached.timestamp;
-
-
-            /*
-                Fresh cache
-            */
-
-            if (
-                age <
-                CACHE_TIME
-            ) {
-
-                console.log(
-                    `⚡ CACHE HIT: ${query}`
-                );
-
-
-                return res.json({
-
-                    success:
-                        true,
-
-                    cached:
-                        true,
-
-                    stale:
-                        false,
-
-                    results:
-                        cached.results
-
-                });
-
-            }
-
-        }
-
-
-        /* =================================================
-           DAILY API SAFETY CHECK
-        ================================================= */
-
-        if (
-            !canUseYouTubeSearch()
-        ) {
-
-            console.warn(
-                "🛑 Daily YouTube search safety limit reached"
+            console.log(
+                `⚡ Cache hit: ${query}`
             );
 
 
-            /*
-                Use stale cache if available.
-            */
+            return res.json({
 
-            if (
-                cached &&
-                cached.results &&
-                cached.results.length
-            ) {
+                results:
+                    cached.results,
 
-                return res.json({
+                cached:
+                    true,
 
-                    success:
-                        true,
+                searchesUsed:
+                    usage.count,
 
-                    cached:
-                        true,
+                searchesRemaining:
+                    Math.max(
+                        0,
+                        DAILY_LIMIT -
+                        usage.count
+                    )
 
-                    stale:
-                        true,
+            });
 
-                    message:
-                        "Showing saved results.",
+        }
 
-                    results:
-                        cached.results
 
-                });
+        /* ---------------------------------------------
+           DAILY LIMIT
+        --------------------------------------------- */
 
-            }
+        if (
+            usage.count >=
+            DAILY_LIMIT
+        ) {
+
+            console.warn(
+                "⚠️ Daily search limit reached"
+            );
 
 
             return res
-                .status(503)
+                .status(429)
                 .json({
 
-                    success:
-                        false,
-
-                    quota:
-                        true,
-
                     error:
-                        "Search temporarily unavailable.",
+                        "Daily search limit reached. Please try again tomorrow.",
 
-                    message:
-                        "Daily search limit reached. Please try again later.",
+                    limit:
+                        DAILY_LIMIT,
 
-                    results:
-                        []
+                    searchesUsed:
+                        usage.count,
+
+                    searchesRemaining:
+                        0,
+
+                    resetDate:
+                        usage.date
 
                 });
 
         }
 
 
-        /* =================================================
+        /* ---------------------------------------------
            YOUTUBE QUERY
-        ================================================= */
+        --------------------------------------------- */
 
         const youtubeQuery =
             `${query} Zubeen Garg Assamese`;
@@ -659,96 +489,67 @@ app.get(
         );
 
 
+        /* ---------------------------------------------
+           YOUTUBE PARAMETERS
+        --------------------------------------------- */
+
+        const params =
+            new URLSearchParams({
+
+                part:
+                    "snippet",
+
+                q:
+                    youtubeQuery,
+
+                type:
+                    "video",
+
+                maxResults:
+                    "10",
+
+                regionCode:
+                    "IN",
+
+                relevanceLanguage:
+                    "en",
+
+                videoEmbeddable:
+                    "true",
+
+                videoSyndicated:
+                    "true",
+
+                key:
+                    API_KEY
+
+            });
+
+
+        const youtubeURL =
+            "https://www.googleapis.com/youtube/v3/search?" +
+            params.toString();
+
+
         try {
 
-            /* =================================================
-               PARAMETERS
-            ================================================= */
-
-            const params =
-                new URLSearchParams({
-
-                    part:
-                        "snippet",
-
-                    q:
-                        youtubeQuery,
-
-                    type:
-                        "video",
-
-                    maxResults:
-                        "10",
-
-                    regionCode:
-                        "IN",
-
-                    relevanceLanguage:
-                        "en",
-
-                    videoEmbeddable:
-                        "true",
-
-                    videoSyndicated:
-                        "true",
-
-                    key:
-                        API_KEY
-
-                });
-
-
-            /* =================================================
-               URL
-            ================================================= */
-
-            const youtubeURL =
-                "https://www.googleapis.com/youtube/v3/search?" +
-                params.toString();
-
-
-            /*
-                Count ONLY when we are
-                actually going to YouTube.
-            */
-
-            recordYouTubeSearch();
-
-
-            /* =================================================
-               REQUEST
-            ================================================= */
+            /* -----------------------------------------
+               YOUTUBE REQUEST
+            ----------------------------------------- */
 
             const response =
-                await fetchYouTube(
+                await fetch(
                     youtubeURL
                 );
 
 
-            /* =================================================
-               JSON
-            ================================================= */
-
-            let data = {};
+            const data =
+                await response.json();
 
 
-            try {
-
-                data =
-                    await response.json();
-
-            }
-
-            catch {
-
-                data = {};
-
-            }
-
-
-            /* =================================================
-               API ERROR
-            ================================================= */
+            /* -----------------------------------------
+               YOUTUBE ERROR
+            ----------------------------------------- */
 
             if (
                 !response.ok
@@ -756,217 +557,44 @@ app.get(
 
                 console.error(
                     "❌ YouTube API error:",
-                    response.status,
                     data
                 );
 
 
-                const reasons =
-                    data
-                        ?.error
-                        ?.errors
-                        ?.map(
-                            item =>
-                                item.reason
-                        ) ||
-                    [];
-
-
-                /* =============================================
-                   QUOTA ERROR
-                ============================================= */
-
-                if (
-
-                    reasons.includes(
-                        "quotaExceeded"
-                    )
-
-                    ||
-
-                    reasons.includes(
-                        "dailyLimitExceeded"
-                    )
-
-                ) {
-
-                    console.warn(
-                        "🛑 YouTube quota exceeded"
-                    );
-
-
-                    /*
-                        Stale cache fallback
-                    */
-
-                    if (
-                        cached &&
-                        cached.results &&
-                        cached.results.length
-                    ) {
-
-                        return res.json({
-
-                            success:
-                                true,
-
-                            cached:
-                                true,
-
-                            stale:
-                                true,
-
-                            message:
-                                "Showing saved results.",
-
-                            results:
-                                cached.results
-
-                        });
-
-                    }
-
-
-                    return res
-                        .status(503)
-                        .json({
-
-                            success:
-                                false,
-
-                            quota:
-                                true,
-
-                            error:
-                                "YouTube search is temporarily unavailable.",
-
-                            message:
-                                "Please try again later.",
-
-                            results:
-                                []
-
-                        });
-
-                }
-
-
-                /* =============================================
-                   INVALID API KEY
-                ============================================= */
-
-                if (
-
-                    reasons.includes(
-                        "keyInvalid"
-                    )
-
-                ) {
-
-                    console.error(
-                        "❌ YouTube API key is invalid"
-                    );
-
-
-                    return res
-                        .status(500)
-                        .json({
-
-                            success:
-                                false,
-
-                            error:
-                                "YouTube API configuration error.",
-
-                            message:
-                                "Please check the API key in the server environment.",
-
-                            results:
-                                []
-
-                        });
-
-                }
-
-
-                /* =============================================
-                   OTHER API ERROR
-                ============================================= */
-
-                if (
-                    cached &&
-                    cached.results &&
-                    cached.results.length
-                ) {
-
-                    return res.json({
-
-                        success:
-                            true,
-
-                        cached:
-                            true,
-
-                        stale:
-                            true,
-
-                        message:
-                            "Showing saved results.",
-
-                        results:
-                            cached.results
-
-                    });
-
-                }
-
+                /*
+                    Don't count an API request
+                    that failed at the HTTP/API level.
+                */
 
                 return res
-                    .status(503)
+                    .status(
+                        response.status ===
+                            403
+                            ? 503
+                            : response.status
+                    )
                     .json({
 
-                        success:
-                            false,
-
                         error:
-                            "YouTube search is temporarily unavailable.",
-
-                        message:
                             data
                                 ?.error
                                 ?.message ||
-                            "Please try again later.",
-
-                        results:
-                            []
+                            "YouTube API request failed"
 
                     });
 
             }
 
 
-            /* =================================================
-               ITEMS
-            ================================================= */
-
-            const items =
-                Array.isArray(
-                    data.items
-                )
-                    ? data.items
-                    : [];
-
-
-            /* =================================================
-               FILTER ZUBEEN
-            ================================================= */
+            /* -----------------------------------------
+               FILTER RESULTS
+            ----------------------------------------- */
 
             const results =
-                items
+                (data.items || [])
 
                     .filter(
                         item =>
-                            item &&
                             item.id &&
                             item.id.videoId
                     )
@@ -980,7 +608,8 @@ app.get(
                                         ?.snippet
                                         ?.title ||
                                     ""
-                                ).toLowerCase();
+                                )
+                                    .toLowerCase();
 
 
                             const channel =
@@ -989,16 +618,8 @@ app.get(
                                         ?.snippet
                                         ?.channelTitle ||
                                     ""
-                                ).toLowerCase();
-
-
-                            const description =
-                                String(
-                                    item
-                                        ?.snippet
-                                        ?.description ||
-                                    ""
-                                ).toLowerCase();
+                                )
+                                    .toLowerCase();
 
 
                             return (
@@ -1009,6 +630,12 @@ app.get(
 
                                 ||
 
+                                channel.includes(
+                                    "zubeen"
+                                )
+
+                                ||
+
                                 title.includes(
                                     "garg"
                                 )
@@ -1016,29 +643,13 @@ app.get(
                                 ||
 
                                 channel.includes(
-                                    "zubeen"
-                                )
-
-                                ||
-
-                                channel.includes(
                                     "garg"
-                                )
-
-                                ||
-
-                                description.includes(
-                                    "zubeen garg"
                                 )
 
                             );
 
                         }
                     )
-
-                    /*
-                        Only 2 results.
-                    */
 
                     .slice(
                         0,
@@ -1080,148 +691,77 @@ app.get(
                     );
 
 
-            /* =================================================
-               NO RESULTS
-            ================================================= */
+            /* -----------------------------------------
+               COUNT SUCCESSFUL API CALL
+            ----------------------------------------- */
 
-            if (
-                results.length === 0
-            ) {
-
-                console.log(
-                    `⚠️ No Zubeen result: ${query}`
-                );
+            usage.count++;
 
 
-                return res.json({
-
-                    success:
-                        true,
-
-                    cached:
-                        false,
-
-                    results:
-                        [],
-
-                    message:
-                        "No Zubeen Garg song found."
-
-                });
-
-            }
+            console.log(
+                `📊 YouTube usage: ${usage.count}/${DAILY_LIMIT}`
+            );
 
 
-            /* =================================================
+            /* -----------------------------------------
                SAVE CACHE
-            ================================================= */
+            ----------------------------------------- */
 
             searchCache.set(
                 cacheKey,
                 {
 
-                    timestamp:
-                        Date.now(),
-
                     results:
-                        results
+                        results,
+
+                    timestamp:
+                        Date.now()
 
                 }
             );
 
 
-            /* =================================================
-               SUCCESS
-            ================================================= */
-
-            console.log(
-                `✅ ${results.length} result(s): ${query}`
-            );
-
+            /* -----------------------------------------
+               RESPONSE
+            ----------------------------------------- */
 
             return res.json({
 
-                success:
-                    true,
+                results:
+                    results,
 
                 cached:
                     false,
 
-                stale:
-                    false,
+                searchesUsed:
+                    usage.count,
 
-                results:
-                    results
+                searchesRemaining:
+                    Math.max(
+                        0,
+                        DAILY_LIMIT -
+                        usage.count
+                    )
 
             });
 
         }
 
 
-        /* =================================================
-           NETWORK / TIMEOUT ERROR
-        ================================================= */
-
         catch (error) {
 
             console.error(
-                "❌ YouTube request failed:",
-                error.message
+                "❌ Search failed:",
+                error
             );
 
 
-            /*
-                Use stale cache.
-            */
-
-            if (
-                cached &&
-                cached.results &&
-                cached.results.length
-            ) {
-
-                console.log(
-                    `🛟 STALE CACHE FALLBACK: ${query}`
-                );
-
-
-                return res.json({
-
-                    success:
-                        true,
-
-                    cached:
-                        true,
-
-                    stale:
-                        true,
-
-                    message:
-                        "Showing saved results.",
-
-                    results:
-                        cached.results
-
-                });
-
-            }
-
-
             return res
-                .status(503)
+                .status(500)
                 .json({
 
-                    success:
-                        false,
-
                     error:
-                        "Unable to connect to YouTube.",
-
-                    message:
-                        "Please check your internet connection and try again.",
-
-                    results:
-                        []
+                        "Could not connect to YouTube"
 
                 });
 
@@ -1243,14 +783,8 @@ app.use(
             .status(404)
             .json({
 
-                success:
-                    false,
-
                 error:
-                    "API route not found.",
-
-                results:
-                    []
+                    "API route not found"
 
             });
 
@@ -1259,46 +793,29 @@ app.use(
 
 
 /* =====================================================
-   GLOBAL ERROR HANDLER
+   GENERAL ERROR HANDLER
 ===================================================== */
 
 app.use(
     (
-        error,
+        err,
         req,
         res,
         next
     ) => {
 
         console.error(
-            "❌ GLOBAL SERVER ERROR:",
-            error
+            "❌ Server error:",
+            err
         );
-
-
-        if (
-            res.headersSent
-        ) {
-
-            return next(
-                error
-            );
-
-        }
 
 
         res
             .status(500)
             .json({
 
-                success:
-                    false,
-
                 error:
-                    "Internal server error.",
-
-                results:
-                    []
+                    "Internal server error"
 
             });
 
@@ -1312,7 +829,6 @@ app.use(
 
 app.listen(
     PORT,
-    "0.0.0.0",
     () => {
 
         console.log("");
@@ -1322,7 +838,7 @@ app.listen(
         );
 
         console.log(
-            "🎵 ZUBEEN GARG MUSIC WEBSITE"
+            "🎵 ZUBEEN MUSIC SERVER"
         );
 
         console.log(
@@ -1342,26 +858,16 @@ app.listen(
         );
 
         console.log(
-            "⚡ Cache: 30 minutes"
+            `📊 Daily limit: ${DAILY_LIMIT}`
         );
 
         console.log(
-            "🛡️ Rate limit: 20 searches/min/IP"
-        );
-
-        console.log(
-            "📊 Daily YouTube limit: 80 searches"
-        );
-
-        console.log(
-            "⏱️ YouTube timeout: 8 seconds"
+            `📅 Reset timezone: America/Los_Angeles`
         );
 
         console.log(
             "=========================================="
         );
-
-        console.log("");
 
     }
 );
