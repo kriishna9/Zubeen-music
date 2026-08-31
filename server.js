@@ -193,7 +193,8 @@ app.use(
 app.use(
     express.static(
         path.join(
-            __dirname
+            __dirname,
+            "public"
         )
     )
 );
@@ -246,6 +247,7 @@ app.get(
         res.sendFile(
             path.join(
                 __dirname,
+                "public",
                 "index.html"
             )
         );
