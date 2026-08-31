@@ -1,4 +1,4 @@
-a/* =====================================================
+/* =====================================================
    ZUBEEN MUSIC SERVER
    FINAL API SERVER
 ===================================================== */
@@ -45,11 +45,10 @@ const CACHE_TIME =
 
 if (!API_KEY) {
 
-    console.error(
-        "❌ YOUTUBE_API_KEY not found in .env"
+    console.warn(
+        "⚠️ YOUTUBE_API_KEY not found in process.env. YouTube search will require setting YOUTUBE_API_KEY."
     );
 
-    process.exit(1);
 }
 
 
@@ -313,6 +312,19 @@ app.get(
     searchRateLimit,
 
     async (req, res) => {
+
+        if (!process.env.YOUTUBE_API_KEY && !API_KEY) {
+
+            return res
+                .status(500)
+                .json({
+
+                    error:
+                        "YOUTUBE_API_KEY is not configured on the server."
+
+                });
+
+        }
 
         /* ---------------------------------------------
            RESET CHECK
@@ -827,47 +839,53 @@ app.use(
    START SERVER
 ===================================================== */
 
-app.listen(
-    PORT,
-    () => {
+if (require.main === module) {
 
-        console.log("");
+    app.listen(
+        PORT,
+        () => {
 
-        console.log(
-            "=========================================="
-        );
+            console.log("");
 
-        console.log(
-            "🎵 ZUBEEN MUSIC SERVER"
-        );
+            console.log(
+                "=========================================="
+            );
 
-        console.log(
-            "=========================================="
-        );
+            console.log(
+                "🎵 ZUBEEN MUSIC SERVER"
+            );
 
-        console.log(
-            `🌐 http://localhost:${PORT}`
-        );
+            console.log(
+                "=========================================="
+            );
 
-        console.log(
-            `❤️  Health: http://localhost:${PORT}/api/health`
-        );
+            console.log(
+                `🌐 http://localhost:${PORT}`
+            );
 
-        console.log(
-            `🔎 Search: http://localhost:${PORT}/api/search?q=Anamika`
-        );
+            console.log(
+                `❤️  Health: http://localhost:${PORT}/api/health`
+            );
 
-        console.log(
-            `📊 Daily limit: ${DAILY_LIMIT}`
-        );
+            console.log(
+                `🔎 Search: http://localhost:${PORT}/api/search?q=Anamika`
+            );
 
-        console.log(
-            `📅 Reset timezone: America/Los_Angeles`
-        );
+            console.log(
+                `📊 Daily limit: ${DAILY_LIMIT}`
+            );
 
-        console.log(
-            "=========================================="
-        );
+            console.log(
+                `📅 Reset timezone: America/Los_Angeles`
+            );
 
-    }
-);
+            console.log(
+                "=========================================="
+            );
+
+        }
+    );
+
+}
+
+module.exports = app;
