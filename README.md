@@ -1,6 +1,9 @@
 # 🎵 Zubeen Garg — Music Web App
 
 > A modern, sleek web platform to discover and stream **Zubeen Garg's** iconic Assamese songs, powered by Node.js, Express, and YouTube API.
+>
+> <img width="1470" height="835" alt="image" src="https://github.com/user-attachments/assets/d252e921-92c4-4dc0-bc6e-eff2d45b9b2a" />
+
 
 ---
 
