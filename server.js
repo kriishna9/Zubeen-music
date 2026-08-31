@@ -5,6 +5,7 @@
 
 const express = require("express");
 const path = require("path");
+const fs = require("fs");
 const rateLimit = require("express-rate-limit");
 require("dotenv").config();
 
@@ -199,6 +200,15 @@ app.use(
     )
 );
 
+app.use(
+    express.static(
+        path.join(
+            process.cwd(),
+            "public"
+        )
+    )
+);
+
 
 /* =====================================================
    GENERAL API RATE LIMIT
@@ -244,13 +254,22 @@ app.get(
     "/",
     (req, res) => {
 
-        res.sendFile(
-            path.join(
-                __dirname,
-                "public",
-                "index.html"
-            )
-        );
+        const possiblePaths = [
+            path.join(__dirname, "public", "index.html"),
+            path.join(__dirname, "..", "public", "index.html"),
+            path.join(process.cwd(), "public", "index.html")
+        ];
+
+        for (const filePath of possiblePaths) {
+            if (fs.existsSync(filePath)) {
+                return res.sendFile(filePath);
+            }
+        }
+
+        res.json({
+            status: "online",
+            message: "Zubeen Music API Server"
+        });
 
     }
 );
